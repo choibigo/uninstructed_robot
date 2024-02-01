@@ -1,0 +1,9 @@
+{
+    "front_kitchen":[
+        {
+            "model":"chgcrm",
+            "translate":[1.0, 2.0, 0.05],
+            "orientation":[0,0,1,0]
+        }
+    ]
+}
