@@ -5,3 +5,4 @@
 
 #### [호성 일정](https://github.com/choibigo/uninstructed_robot/blob/main/docs/md/hosung.md)
 #### [소은 일정](https://github.com/choibigo/uninstructed_robot/blob/main/docs/md/soeun.md)
+#### [준희 일정](https://github.com/choibigo/uninstructed_robot/blob/main/docs/md/junhea.md)
