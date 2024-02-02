@@ -45,7 +45,7 @@ if __name__ == "__main__":
                         model=object_info['model'],
                         fit_avg_dim_volume=False,
                         position=object_info['translate'],
-                        orientation=[object_info['orientation'][-1]] + object_info['orientation'][0:],
+                        orientation=object_info['orientation'][1:] + [object_info['orientation'][0]],
                         scale=object_info.get('scale',[1.0, 1.0, 1.0]),
                         # abilities=object_info.get('abilities', None),
                         # prim_type=object_info.get('prim_type', 0)
