@@ -1,12 +1,11 @@
 import sys
-sys.path.append(r'D:\workspace\Difficult\git\OmniGibson')
+sys.path.append(r'/home/bluepot/dw_workspace/git/OmniGibson')
 
 import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 import json
 
-import cv2
 import numpy as np
 
 import omnigibson as og
@@ -16,20 +15,12 @@ from omnigibson.utils.ui_utils import KeyboardRobotController
 gm.USE_GPU_DYNAMICS = False
 gm.ENABLE_FLATCACHE = True
 
-# gm.ENABLE_OBJECT_STATES = True
-# gm.USE_GPU_DYNAMICS = True
-
 scene_name = 'Rs_int'
-scene_number = 2
-image_save = True
+scene_number = 1
 
 if __name__ == "__main__":
-
-    save_root_path = r"D:\workspace\Difficult\dataset\behavior_tutlebot_2"
-    os.makedirs(save_root_path, exist_ok=True)
-
     # object config
-    object_load_folder = os.path.join('D:\workspace\Difficult\git\OmniGibson\omnigibson\dw_space\env', f'{scene_name}_{scene_number}')
+    object_load_folder = os.path.join('/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/env', f'{scene_name}_{scene_number}')
     object_list = []
     for json_name in os.listdir(object_load_folder):
         with open(os.path.join(object_load_folder, json_name), 'r') as json_file:
@@ -45,30 +36,21 @@ if __name__ == "__main__":
                         model=object_info['model'],
                         fit_avg_dim_volume=False,
                         position=object_info['translate'],
-                        orientation=object_info['orientation'][1:] + [object_info['orientation'][0]],
+                        orientation=[object_info['orientation'][-1]] + object_info['orientation'][0:],
                         scale=object_info.get('scale',[1.0, 1.0, 1.0]),
-                        # abilities=object_info.get('abilities', None),
-                        # prim_type=object_info.get('prim_type', 0)
                     )
                     object_list.append(temp_object)
         
 
-    # robot config
     robot_name = 'Turtlebot'
-    # robot_name = 'Locobot'
-
     robot0_cfg = dict()
     robot0_cfg["type"] = robot_name
     robot0_cfg["obs_modalities"] = ["rgb", "depth"]
     robot0_cfg["action_type"] = "continuous"
     robot0_cfg["action_normalize"] = True
 
-
     scene_cfg = {"type":"InteractiveTraversableScene","scene_model":scene_name}
     cfg = {"scene": scene_cfg,"objects":object_list, "robots":[robot0_cfg]}
-
-    ##### bin env
-    # cfg = {"scene": {"type": "Scene"},"objects":object_list}
 
     env = og.Environment(configs=cfg, action_timestep=1/60., physics_timestep=1/60.)
 
@@ -87,14 +69,6 @@ if __name__ == "__main__":
         orientation=np.array([0.29, -0.033, -0.1, 0.949]),
     )
 
-    step = 0
     while True:
         action = action_generator.get_random_action() if control_mode == "random" else action_generator.get_teleop_action()
-        robot.get_obs()['robot0:eyes_Camera_sensor_rgb']
-        
-        for _ in range(10):
-            env.step(action=action)
-            if image_save:
-                # image_save_path = os.path.join(save_root_path, f"{step}.png")
-                # cv2.imwrite(image_save_path, cv2.cvtColor(robot.get_obs()['robot0:eyes_Camera_sensor_rgb'], cv2.COLOR_BGR2RGB))
-                step += 1
+        env.step(action=action)
