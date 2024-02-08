@@ -16,7 +16,7 @@ gm.USE_GPU_DYNAMICS = False
 gm.ENABLE_FLATCACHE = True
 
 scene_name = 'Rs_int'
-scene_number = 1
+scene_number = 3
 
 if __name__ == "__main__":
     # object config
@@ -36,7 +36,7 @@ if __name__ == "__main__":
                         model=object_info['model'],
                         fit_avg_dim_volume=False,
                         position=object_info['translate'],
-                        orientation=[object_info['orientation'][-1]] + object_info['orientation'][0:],
+                        orientation=object_info['orientation'][1:] + [object_info['orientation'][0]],
                         scale=object_info.get('scale',[1.0, 1.0, 1.0]),
                     )
                     object_list.append(temp_object)

@@ -1,4 +1,7 @@
 import sys
+from PIL import Image
+
+import cv2
 sys.path.append(r'/home/bluepot/dw_workspace/git/OmniGibson')
 
 import os
@@ -45,7 +48,7 @@ if __name__ == "__main__":
     robot_name = 'Turtlebot'
     robot0_cfg = dict()
     robot0_cfg["type"] = robot_name
-    robot0_cfg["obs_modalities"] = ["rgb", "depth"]
+    robot0_cfg["obs_modalities"] = ["rgb", "depth_linear"]
     robot0_cfg["action_type"] = "continuous"
     robot0_cfg["action_normalize"] = True
 
@@ -71,4 +74,14 @@ if __name__ == "__main__":
 
     while True:
         action = action_generator.get_random_action() if control_mode == "random" else action_generator.get_teleop_action()
-        env.step(action=action)
+        
+        obs, reward, done, info = env.step(action=action)
+        depth_map = obs['robot0']['robot0:eyes_Camera_sensor_depth_linear']
+        depth_map[depth_map > 2] = 0
+        depth_map[depth_map < 0.15] = 0
+
+        depth_normalized = (depth_map - depth_map.min()) / (depth_map.max() - depth_map.min())
+        # depth_img = Image.fromarray((depth_normalized * 255).squeeze().astype(np.uint8), mode="L")
+        depth_img = np.array(depth_normalized*255).astype(np.uint8)
+        cv2.imwrite('test.png', depth_img)
+        cv2.imshow('Depth', depth_img)

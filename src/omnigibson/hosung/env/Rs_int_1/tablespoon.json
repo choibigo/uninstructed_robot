@@ -1,0 +1,10 @@
+{
+    "up_coutertop":[
+        {
+            "model":"mwzxal",
+            "translate":[-0.153, 1.57, 1.117],
+            "orientation":[0.78, 0.24, 0.25, -0.51],
+            "scale":[1.0, 1.0, 1.0]
+        }
+    ]
+}
