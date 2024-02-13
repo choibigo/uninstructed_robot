@@ -1,0 +1,34 @@
+{
+    "shelve_floor_1":[
+        {
+            "model":"scycof",
+            "translate":[1.0, -3.7, 0.40],
+            "orientation":[0.69, 0.0, 0.7, 0.0]
+        },
+        {
+            "model":"qkczyc",
+            "translate":[1.0, -3.7, 0.39],
+            "orientation":[0.69, 0.0, 0.7, 0.0]
+        },
+        {
+            "model":"scycof",
+            "translate":[1.13, -3.7, 0.4],
+            "orientation":[0.69, 0.0, 0.7, 0.0]
+        },
+        {
+            "model":"qkczyc",
+            "translate":[1.63, -3.7312, 0.394],
+            "orientation":[0.69, 0.0, 0.7, 0.0]
+        },
+        {
+            "model":"nekxsh",
+            "translate":[1.5, -3.7312, 0.3844],
+            "orientation":[0.77, 0.0, -0.63, 0.0]
+        },
+        {
+            "model":"xmbxfm",
+            "translate":[1.34, -3.7312, 0.423],
+            "orientation":[1.0, 0.0, 0, 0.0]
+        }
+    ]
+}

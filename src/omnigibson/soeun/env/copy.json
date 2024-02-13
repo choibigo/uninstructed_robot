@@ -1,0 +1,10 @@
+{
+    "where":[
+        {
+            "model":"krtwsl",
+            "translate":[0, 0, 0],
+            "orientation":[0, 0, 0, 0]
+            
+        }
+    ]
+}
