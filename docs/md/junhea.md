@@ -33,3 +33,4 @@ self-supervised learning이란 엄청나게 많은 양의 데이터를 스스로
 
 
 https://www.youtube.com/watch?v=MxKqIR5Rffc  (vscode와 깃허브 연동 시도중...)
+https://shortcuts.tistory.com/8              (git의 각종 명령어들)
