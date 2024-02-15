@@ -9,11 +9,10 @@ import json
 import numpy as np
 
 import omnigibson as og
-import omni.replicator.core as rep
 
 from omnigibson.macros import gm
 from omnigibson.utils.ui_utils import KeyboardRobotController
-from omnigibson.utils.render_utils import create_skylight
+
 
 
 gm.USE_GPU_DYNAMICS = False
@@ -51,7 +50,6 @@ if __name__ == "__main__":
     cfg = {"scene": scene_cfg,"objects":object_list}
 
     env = og.Environment(configs=cfg, action_timestep=1/60., physics_timestep=1/60.)
-    light = create_skylight(intensity=500, color=(1.0, 1.0, 1.0))
     og.sim.viewer_camera.set_position_orientation(
         position=np.array([0.22, -1.6, 2.29]),
         orientation=np.array([0.29, -0.033, -0.1, 0.949]),
