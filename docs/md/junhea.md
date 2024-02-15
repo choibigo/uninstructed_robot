@@ -30,3 +30,6 @@ x값 (데이터 합성곱에서는 '필터'의 시작 지점 / 이하 x로 표�
 3) self-supervised learning이란 무엇일까?, 이 내용에서 나오는 Downstream이란 용어의 의미는 무엇일까?
 
 self-supervised learning이란 엄청나게 많은 양의 데이터를 스스로 라벨을 부여해 학습하는 모델을 의미합니다. 예를 들어 그림을 회전시켜서 각도라는 라벨을 부여하여 데이터로부터 곧바로 얻을 수 있는 종류의 라벨을 부여하여 학습을 진행하게 됩니다. 이때 Downstream task는 앞에서 self-supervised learning으로 학습한 모델을 transfer하여 사용하며 라벨이 있는 소규모 데이터를 이용하여 downstream task에 맞게 추가된 계층만 학습하게 됩니다.
+
+
+https://www.youtube.com/watch?v=MxKqIR5Rffc  (vscode와 깃허브 연동 시도중...)
