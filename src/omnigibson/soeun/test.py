@@ -1,50 +1,52 @@
-import cv2
+import sys
+sys.path.append(r'/home/starry/workspaces/dw_workspace/git/OmniGibson')
+
+from omnigibson.macros import macros as m
+from omnigibson.object_states import *
+from omnigibson.systems import get_system, is_physical_particle_system, is_visual_particle_system
+from omnigibson.utils.constants import PrimType
+from omnigibson.utils.physx_utils import apply_force_at_pos, apply_torque
+import omnigibson.utils.transform_utils as T
+from omnigibson.utils.usd_utils import BoundingBoxAPI
+import omnigibson as og
+
+from utils import og_test, get_random_pose, place_objA_on_objB_bbox, place_obj_on_floor_plane
+
+import pytest
 import numpy as np
 
-img = cv2.imread("/home/starry/workspaces/dw_workspace/git/uninstructed_robot/src/omnigibson/soeun/rgb.png")
-size = img.shape
-print(size)
 
-#2차원 영상좌표
-points_2D = np.array([
-                        (340, 700),  #좌 하단 
-                        (735, 700),  #우 하단
-                        (340, 305),  #좌 상단
-                        (734, 305),  #우 상단
-                      ], dtype="double")
-                      
-#3차원 월드좌표
-points_3D = np.array([
-                      (0.5, 0.1, 0.21),       #좌 하단
-                      (0.5, -0.1, 0.21),        #우 하단
-                      (0.5, 0.1, 0.41),        #좌 상단
-                      (0.5, -0.1, 0.41)          #우 상단
-                     ], dtype="double")
+@og_test
+def test_filled():
+    stockpot = og.sim.scene.object_registry("name", "stockpot")
 
-focal_x = 1172.798
-focal_y = 1172.798
-center_x = 512
-center_y = 512
+    systems = (
+        get_system("water"),
+        get_system("raspberry"),
+        get_system("diced_apple"),
+    )
+    for system in systems:
+        stockpot.set_position_orientation(position=np.ones(3) * 50.0, orientation=[0, 0, 0, 1.0])
+        place_obj_on_floor_plane(stockpot)
+        for _ in range(5):
+            og.sim.step()
 
+        assert stockpot.states[Filled].set_value(system, True)
 
-# camera 내부 파라미터 
-cameraMatrix = np.array([[focal_x, 0, center_x], 
-                         [0, focal_y, center_y], 
-                         [0, 0, 1]])
+        for _ in range(5):
+            og.sim.step()
 
-#distcoeffs는 카메라의 왜곡을 무시하기 때문에 null값 전달
-dist_coeffs = np.zeros((4,1))
+        assert stockpot.states[Filled].get_value(system)
 
-#solvePnp 함수적용
-retval, rvec, tvec = cv2.solvePnP(points_3D, points_2D, cameraMatrix, dist_coeffs, rvec=None, tvec=None, useExtrinsicGuess=None, flags=None)
+        # Cannot set Filled state False
+        with pytest.raises(NotImplementedError):
+            stockpot.states[Filled].set_value(system, False)
+        system.remove_all_particles()
 
-R, _ = cv2.Rodrigues(rvec)
-t= tvec
+        for _ in range(5):
+            og.sim.step()
+        assert not stockpot.states[Filled].get_value(system)
 
-print(rvec)
-print("\n")
-print(R)
-print("\n")
-print(R.shape)
-print("\n")
-print(t)
+        system.remove_all_particles()
+
+test_filled()
