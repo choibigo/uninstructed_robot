@@ -36,7 +36,8 @@ https://shortcuts.tistory.com/8              (git의 각종 명령어들)
 
 
 
-
+#### 정리 
+- [Python 설치 정리](https://github.com/choibigo/uninstructed_robot/blob/main/docs/md/junhea_workspace/temp.md)
 
 
 
