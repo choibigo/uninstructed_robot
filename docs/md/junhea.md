@@ -44,5 +44,5 @@ https://shortcuts.tistory.com/8              (git의 각종 명령어들)
 #### 02.16 미팅
 Python
 - pip install pillow 
-- 점프 투 파이썬(https://wikidocs.net/8) (8장 제외)
+- 점프 투 파이썬(https://wikidocs.net/8) (~ 6장 까지)
 - 아나콘다사용 해서 파이썬 버전 2개 실행해 보기
