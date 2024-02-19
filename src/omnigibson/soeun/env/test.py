@@ -1,5 +1,5 @@
 import sys
-sys.path.append(r'/home/starry/workspaces/dw_workspace/git/OmniGibson')
+sys.path.append(r'/home/bluepot/dw_workspace/git/OmniGibson')
 
 from omnigibson.macros import macros as m
 from omnigibson.object_states import *
@@ -19,11 +19,10 @@ import numpy as np
 @og_test
 def test_filled():
     stockpot = og.sim.scene.object_registry("name", "stockpot")
+    print('\n-----------------------------------------------\n',stockpot)
 
     systems = (
         get_system("water"),
-        get_system("raspberry"),
-        get_system("diced_apple"),
     )
     for system in systems:
         stockpot.set_position_orientation(position=np.ones(3) * 50.0, orientation=[0, 0, 0, 1.0])
@@ -32,12 +31,10 @@ def test_filled():
             og.sim.step()
 
         assert stockpot.states[Filled].set_value(system, True)
-
         for _ in range(5):
             og.sim.step()
 
         assert stockpot.states[Filled].get_value(system)
-
         # Cannot set Filled state False
         with pytest.raises(NotImplementedError):
             stockpot.states[Filled].set_value(system, False)
@@ -49,4 +46,8 @@ def test_filled():
 
         system.remove_all_particles()
 
-test_filled()
+while True:
+    test_filled()
+
+
+# <class 'omnigibson.object_states.filled.Filled'>: <omnigibson.object_states.filled.Filled object at 0x7feae47e4350>, 

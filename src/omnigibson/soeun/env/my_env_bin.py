@@ -9,10 +9,10 @@ import json
 import numpy as np
 
 import omnigibson as og
-
+from omnigibson import object_states
 from omnigibson.macros import gm
 from omnigibson.utils.ui_utils import KeyboardRobotController
-
+from omnigibson.utils.constants import ParticleModifyCondition
 
 
 gm.USE_GPU_DYNAMICS = False
@@ -24,8 +24,9 @@ scene_number = 3
 
 if __name__ == "__main__":
     # object config
-    object_load_folder = os.path.join('/home/starry/workspaces/dw_workspace/git/uninstructed_robot/src/omnigibson/soeun/env', f'{scene_name}_{scene_number}')
+    object_load_folder = os.path.join(os.path.split(__file__)[0], f'{scene_name}_{scene_number}')
     object_list = []
+
     for json_name in os.listdir(object_load_folder):
         with open(os.path.join(object_load_folder, json_name), 'r') as json_file:
             dict_from_json = json.load(json_file)
@@ -57,3 +58,6 @@ if __name__ == "__main__":
 
     while True:
         env.step(np.array([]))
+        
+
+    
