@@ -1,0 +1,822 @@
+[
+	{
+		"id": 1,
+		"label": "bottom_cabinet",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 2,
+		"label": "bottom_cabinet",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 3,
+		"label": "bottom_cabinet",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 4,
+		"label": "breakfast_table",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 5,
+		"label": "breakfast_table",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 6,
+		"label": "coffee_table",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 7,
+		"label": "floor_lamp",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 8,
+		"label": "laptop",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 9,
+		"label": "loudspeaker",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 10,
+		"label": "pot_plant",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 11,
+		"label": "pot_plant",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 12,
+		"label": "pot_plant",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 13,
+		"label": "shelf",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 14,
+		"label": "shelf",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 15,
+		"label": "shelf",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 16,
+		"label": "sofa",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 17,
+		"label": "standing_tv",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 18,
+		"label": "ottoman",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 19,
+		"label": "straight_chair",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 20,
+		"label": "straight_chair",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 21,
+		"label": "straight_chair",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 22,
+		"label": "straight_chair",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 23,
+		"label": "straight_chair",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 24,
+		"label": "swivel_chair",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 25,
+		"label": "table_lamp",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 26,
+		"label": "trash_can",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 27,
+		"label": "bed",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 28,
+		"label": "bottom_cabinet",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 29,
+		"label": "bottom_cabinet",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 30,
+		"label": "bottom_cabinet",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 31,
+		"label": "carpet",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 32,
+		"label": "carpet",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 33,
+		"label": "countertop",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 34,
+		"label": "dishwasher",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 35,
+		"label": "door",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 36,
+		"label": "door",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 37,
+		"label": "electric_switch",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 38,
+		"label": "electric_switch",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 39,
+		"label": "electric_switch",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 40,
+		"label": "electric_switch",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 41,
+		"label": "electric_switch",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 42,
+		"label": "electric_switch",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 43,
+		"label": "fridge",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 44,
+		"label": "microwave",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 45,
+		"label": "mirror",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 46,
+		"label": "oven",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 47,
+		"label": "picture",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 48,
+		"label": "picture",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 49,
+		"label": "picture",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 50,
+		"label": "shower_stall",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 51,
+		"label": "sink",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 52,
+		"label": "sink",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 53,
+		"label": "toilet",
+		"status": "dynamic",
+		"color": [
+			255,
+			0,
+			255
+		]
+	},
+	{
+		"id": 54,
+		"label": "top_cabinet",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 55,
+		"label": "top_cabinet",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 56,
+		"label": "top_cabinet",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 57,
+		"label": "top_cabinet",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 58,
+		"label": "top_cabinet",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 59,
+		"label": "towel_rack",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 60,
+		"label": "towel_rack",
+		"status": "static",
+		"color": [
+			0,
+			255,
+			255
+		]
+	},
+	{
+		"id": 61,
+		"label": "window",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 62,
+		"label": "window",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 63,
+		"label": "window",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 64,
+		"label": "window",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 65,
+		"label": "ceilings",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 66,
+		"label": "ceilings",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 67,
+		"label": "ceilings",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 68,
+		"label": "ceilings",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 69,
+		"label": "ceilings",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 70,
+		"label": "floors",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 71,
+		"label": "floors",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 72,
+		"label": "floors",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 73,
+		"label": "floors",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 74,
+		"label": "floors",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 75,
+		"label": "walls",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 76,
+		"label": "walls",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 77,
+		"label": "walls",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 78,
+		"label": "walls",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 79,
+		"label": "walls",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 80,
+		"label": "walls",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 81,
+		"label": "walls",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	},
+	{
+		"id": 82,
+		"label": "agent",
+		"status": "Non-object",
+		"color": [
+			255,
+			255,
+			0
+		]
+	}
+]
