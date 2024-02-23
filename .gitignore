@@ -1511,3 +1511,17 @@ src/omnigibson/hosung/image_frames/frames_240222/1215.png
 src/omnigibson/hosung/image_frames/frames_240222/1216.png
 src/omnigibson/hosung/image_frames/frames_240222/1217.png
 src/omnigibson/hosung/image_frames/frames_240222/1218.png
+src/omnigibson/hosung/groundtruth_per_env/gt_bbox_Rs_int_3_1.json
+src/omnigibson/hosung/groundtruth_per_env/gt_full_Rs_int_3_0.json
+src/omnigibson/hosung/groundtruth_per_env/gt_full_Rs_int_3_1.json
+src/omnigibson/hosung/groundtruth_per_env/gt_full_Rs_int_3_2.json
+src/omnigibson/hosung/groundtruth_per_env/gt_full_Rs_int_3_3.json
+src/omnigibson/hosung/groundtruth_per_env/gt_full_Rs_int_3_4.json
+src/omnigibson/hosung/groundtruth_per_env/gt_full_Rs_int_3.json
+src/omnigibson/hosung/groundtruth_per_env/gt_Rs_int_0.json
+src/omnigibson/hosung/groundtruth_per_env/gt_Rs_int_3_0.json
+src/omnigibson/hosung/groundtruth_per_env/gt_Rs_int_3_1.json
+src/omnigibson/hosung/groundtruth_per_env/gt_Rs_int_3_2.json
+src/omnigibson/hosung/groundtruth_per_env/gt_Rs_int_3_3.json
+src/omnigibson/hosung/groundtruth_per_env/gt_Rs_int_3_4.json
+src/omnigibson/hosung/groundtruth_per_env/gt_Rs_int_3.json

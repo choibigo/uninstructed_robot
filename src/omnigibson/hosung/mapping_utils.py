@@ -1,42 +1,40 @@
 import numpy as np
 import json
-from object_ground_truth import groundtruth
 
 #for creating groundthuth json file to be used as a reference 
-def groundtruth_json():
-    list0 = groundtruth()
+def groundtruth_for_reference(bbox_3d, env_name):
     exception_list = [0]
-    object_groundtruth = []
-    for i in range(len(list0)):
-            if list0[i][2] in ['bottom_cabinet', 'breakfast_table', 'coffee_table', 'pot_plant', 'shelf', 'sofa', 'ottoman', 'trash_can',
-                            'carpet', 'countertop', 'door', 'fridge', 'mirror', 'top_cabinet','towel_rack']:
+    object_groundtruth = {}
+    object_full = {}
+    for i in range(len(bbox_3d)):
+        if bbox_3d[i][2] in ['bottom_cabinet', 'breakfast_table', 'coffee_table', 'pot_plant', 'shelf', 'sofa', 'ottoman', 'trash_can',
+                        'carpet', 'countertop', 'door', 'fridge', 'mirror', 'top_cabinet','towel_rack']:
 
-                    object_groundtruth.append({'id' : list0[i][0],
-                                    'label' : list0[i][2],
-                                    'status' : 'static',
-                                    'color' : (0,255,255)
-                    })
-            elif list0[i][2] in ['walls', 'ceilings', 'floors', 'agent', 'window', 'electric_switch']:
-                    object_groundtruth.append({'id' : list0[i][0],
-                                    'label' : list0[i][2],
-                                    'status' : 'Non-object',
-                                    'color' : (255,255,0)
-                    })
-                    exception_list.append(list0[i][0])
-            else:
-                    object_groundtruth.append({'id' : list0[i][0],
-                                    'label' : list0[i][2],
-                                    'status' : 'dynamic',
-                                    'color' : (255,0,255)
-                    })
-
-    print(object_groundtruth)
-    print(exception_list)
-
-    with open('uninstructed_robot/src/omnigibson/hosung/object_ground_truth.json', 'w', encoding='utf-8') as f:
+                object_groundtruth[f'{int(bbox_3d[i][0])}'] = {
+                                'label' : bbox_3d[i][2],
+                                'status' : 'static',
+                                'color' : (0,255,255)
+                }
+        elif bbox_3d[i][2] in ['walls', 'ceilings', 'floors', 'agent', 'window', 'electric_switch']:
+                object_groundtruth[f'{int(bbox_3d[i][0])}']={
+                                'label' : bbox_3d[i][2],
+                                'status' : 'Non-object',
+                                'color' : (255,255,0)
+                }
+                exception_list.append(int(bbox_3d[i][0]))
+        else:
+                object_groundtruth[f'{int(bbox_3d[i][0])}']={
+                                'label' : bbox_3d[i][2],
+                                'status' : 'dynamic',
+                                'color' : (255,0,255)
+                }
+        object_full[f'{i}']=[i, bbox_3d[i][2], bbox_3d[i][13].tolist()]
+    with open(f'uninstructed_robot/src/omnigibson/hosung/groundtruth_per_env/gt_{env_name}.json', 'w', encoding='utf-8') as f:
         json.dump(object_groundtruth, f, indent='\t', ensure_ascii=False)
-    with open('uninstructed_robot/src/omnigibson/hosung/exception.json', 'w', encoding='utf-8') as f:
-        json.dump(exception_list, f, indent='\t', ensure_ascii=False)
+    with open(f'uninstructed_robot/src/omnigibson/hosung/groundtruth_per_env/gt_full_{env_name}.json', 'w', encoding='utf-8') as f:
+        json.dump(object_full, f, indent='\t', ensure_ascii=False)
+
+    return object_groundtruth, exception_list
 
 #world coordinates to 2d map pixel coordinates : map(1024x1024)
 def world_to_map(list_of_coor):
