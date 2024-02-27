@@ -277,3 +277,50 @@
 
 ### 5장
 #### 클래스
+###### 클래스 생성 및 사용 예제
+- 다음과 같이 작성하고 호출할 수 있다.(사칙연산)
+class FourCal:
+    def __init__(self):
+        self.a = 0
+        self.b = 0
+    
+    def setdata(self, x, y):
+        self.a = x
+        self.b = y
+    
+    def add(self):
+        return self.a + self.b
+    
+    def sub(self):
+        return self.a - self.b
+    
+    def mul(self):
+        return self.a * self.b
+    
+    def div(self):
+        return self.a / self.b
+
+returnn = FourCal()
+returnn.setdata(3, 4)
+print(returnn.add())
+print(returnn.sub())
+print(returnn.mul())
+print(returnn.div())
+
+###### 클래스 상속
+- 다음과 같이 작성하면 새로운 클래스 이름으로 상속받은 클래스의 내용을 사용할 수 있다. class 새로운_클래스_이름(상속할_클래스_이름)
+- 다음과 같이 작성하면 상속받은 클래스에 더하여 새로운 기능을 새로운 클래스에 추가할 수 있다.
+class More(FourCal):
+    def new(self):
+        ...
+        return ???
+
+a = More()
+a.new()
+
+- 이 기능은 기존의 클래스를 그대로 두고 기능을 추가할 때 사용한다.
+
+###### 메서드 오버라이딩
+- 상속 받기 전 클래스에 이미 def 되어있는 메서드를 상속 받은 클래스에서 똑같은 이름으로 def 하면 메서드가 덮어씌우기 된다.
+
+###### 클래스변수
