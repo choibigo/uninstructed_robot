@@ -106,8 +106,6 @@ def main():
     print("Running demo.")
     print("Press ESC to quit")
 
-    #for ground truth mapping
-    ### need to change so this can be called directly by json file or maybe add to OBJECT_GROUNDTRUTH
     c_relative_pos, c_relative_ori = env.robots[0].sensors['robot0:eyes_Camera_sensor'].get_position_orientation()
 
     #for visualization : initializing 2d map for navigation and localization
@@ -120,12 +118,11 @@ def main():
     activate_scan = False
     count = 0
     
-    
+
     
     for repeat in range(5):
         action = action_generator.get_teleop_action()
         obs, reward, done, info = env.step(action=action)
-
         cam = og.sim.viewer_camera
         cam.add_modality("bbox_3d")
         bbox_obs = cam.get_obs()

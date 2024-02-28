@@ -48,7 +48,7 @@ gm.ENABLE_FLATCACHE=False
 env_name = 'Rs_int'
 env_number = 3
 
-scan_tik = 5
+scan_tik = 10
 pix_stride = 16
 zc_lower_bound = 0.15
 zc_higher_bound = 2.5
@@ -104,6 +104,7 @@ def main():
 
     # trigger for scanning : 'B'
     activate_scan = False
+    start_detecting = False
     count = 0
     
     action = action_generator.get_teleop_action()
@@ -123,7 +124,8 @@ def main():
                         cv2.rectangle(map2d_pixel, corners[0], corners[1], (255, 255, 255), 1)
                     else:
                         cv2.rectangle(map2d_pixel, corners[0], corners[1], (0, 255, 0), 1)
-    color_count = 60
+    color_count = 0
+    color_pallet = [(0,255,255),(255,255,0)]
     while True:
     
         #control robot via keyboard input
@@ -135,10 +137,9 @@ def main():
         else:
             count+=1
             #right turn with slower angular velocity
-            action = [0.0, -0.1]
+            action = action_generator.get_teleop_action()
             if count == scan_tik:
                 count = 0
-                activate_scan = False
                 map2d_pixel_result = np.copy(map2d_pixel)
                 for key in OBJECT_DATA:
                     #for visualization
@@ -147,12 +148,12 @@ def main():
                         cv2.circle(map2d_pixel, 
                                 world_to_map(OBJECT_DATA[f'{key}']['coordinates']/OBJECT_DATA[f'{key}']['count']), 
                                 3, 
-                                (0, color_count, color_count), 
+                                color_pallet[color_count], 
                                 -1)
                         cv2.circle(map2d_pixel,
                                 world_to_map(c_abs_pose),
                                 5,
-                                (0, color_count, color_count),
+                                color_pallet[color_count],
                                 -1
                                 )
                 map2d_pixel_result = np.copy(map2d_pixel)
@@ -174,10 +175,14 @@ def main():
         keyboard_input = action_generator.current_keypress
 
         if str(keyboard_input) == 'KeyboardInput.N':
-            color_count += 50
+            color_count = 1
         #B : activate scan mode
         if str(keyboard_input) == 'KeyboardInput.B':
-            activate_scan = True
+            if activate_scan == False:
+                activate_scan = True
+            else :
+                activate_scan = False
+
 
         obs, reward, done, info = env.step(action=action)
         
@@ -242,13 +247,14 @@ def main():
                 if seg_count > 0:
                     avg_coor = final_coor / seg_count
                 
-                    OBJECT_DATA[f'{color_count}'] = {'label' : OBJECT_LABEL_GROUNDTRUTH[int(segment_id_list[idx])-1]['label'],
-                                                    'status' : OBJECT_LABEL_GROUNDTRUTH[int(segment_id_list[idx])-1]['status'],
-                                                    'color' : OBJECT_LABEL_GROUNDTRUTH[int(segment_id_list[idx])-1]['color'],
+                    OBJECT_DATA[f'{color_count}'] = {'label' : OBJECT_LABEL_GROUNDTRUTH[f'{segment_id_list[idx]}']['label'],
+                                                    'status' : OBJECT_LABEL_GROUNDTRUTH[f'{segment_id_list[idx]}']['status'],
+                                                    'color' : OBJECT_LABEL_GROUNDTRUTH[f'{segment_id_list[idx]}']['color'],
                                                     'coordinates': avg_coor, 
                                                     'count': 1
                                                     }
                     if 'final' not in OBJECT_DATA:
+                        OBJECT_DATA['final'] = {}
                         OBJECT_DATA['final']['coordinates'] = avg_coor
                         OBJECT_DATA['final']['count'] = 1
                     else : 
