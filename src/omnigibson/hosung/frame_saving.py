@@ -145,9 +145,11 @@ def main():
                 save = True
 
         if save == True:    
-            cv2.imwrite(f'uninstructed_robot/src/omnigibson/hosung/image_frames/frames_240228/{count}.png', cv2.cvtColor(obs['robot0']['robot0:eyes_Camera_sensor_rgb'], cv2.COLOR_BGR2RGB))
+            cv2.imwrite(f'uninstructed_robot/src/omnigibson/hosung/image_frames/frames_rgb_240228/{count}.png', cv2.cvtColor(obs['robot0']['robot0:eyes_Camera_sensor_rgb'], cv2.COLOR_BGR2RGB))
+            np.save(f'uninstructed_robot/src/omnigibson/hosung/image_frames/frames_depth_240228/{count}_depth', obs['robot0']['robot0:eyes_Camera_sensor_depth_linear'])
+            np.save(f'uninstructed_robot/src/omnigibson/hosung/image_frames/frames_segmentation_240228/{count}_depth', np.array(obs['robot0']['robot0:eyes_Camera_sensor_seg_instance'], dtype=np.uint8))
 
-        cv2.imshow('2D Map', cv2.cvtColor(obs['robot0']['robot0:eyes_Camera_sensor_rgb'], cv2.COLOR_BGR2RGB))
+        # cv2.imshow('2D Map', cv2.cvtColor(obs['robot0']['robot0:eyes_Camera_sensor_rgb'], cv2.COLOR_BGR2RGB))
         cv2.waitKey(1)
         count += 1
     env.close()
