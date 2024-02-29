@@ -81,17 +81,7 @@ def main():
     action_generator = KeyboardRobotController(robot=robot)
     action_generator.print_keyboard_teleop_info()
 
-    print("Running demo.")
-    print("Press ESC to quit")
-
-    #for ground truth mapping
-    ### need to change so this can be called directly by json file or maybe add to OBJECT_GROUNDTRUTH
-    cam = og.sim.viewer_camera
-    cam.set_position_orientation(
-        position=np.array([1.46949, -3.97358, 2.21529]),
-        orientation=np.array([0.56829048, 0.09569975, 0.13571846, 0.80589577]),
-    )
-
+    c_relative_pos, c_relative_ori = env.robots[0].sensors['robot0:eyes_Camera_sensor'].get_position_orientation()
 
     save = False
     count = 0
@@ -103,6 +93,8 @@ def main():
         keyboard_input = action_generator.current_keypress
 
         obs, reward, done, info = env.step(action=action)
+        agent_pos, agent_ori = env.robots[0].get_position_orientation()
+        c_abs_pose, c_abs_ori = agent_pos + c_relative_pos, quat_multiply(agent_ori, c_relative_ori)
         
 
         if str(keyboard_input) == 'KeyboardInput.B':
@@ -126,10 +118,13 @@ def main():
             os.makedirs(extra_info_in_frame, exist_ok=True)
             depth_path = os.path.join(extra_info_in_frame, 'depth')
             seg_path = os.path.join(extra_info_in_frame, 'seg')
+            pose_ori = os.path.join(extra_info_in_frame, 'pose_ori')
             
             cv2.imwrite(image_path, cv2.cvtColor(obs['robot0']['robot0:eyes_Camera_sensor_rgb'], cv2.COLOR_BGR2RGB))
             np.save(depth_path, obs['robot0']['robot0:eyes_Camera_sensor_depth_linear'])
             np.save(seg_path, np.array(obs['robot0']['robot0:eyes_Camera_sensor_seg_instance'], dtype=np.uint8))
+            np.save(pose_ori, np.array([c_abs_pose, c_abs_ori]))
+
 
         cv2.imshow('2D Map', cv2.cvtColor(obs['robot0']['robot0:eyes_Camera_sensor_rgb'], cv2.COLOR_BGR2RGB))
         cv2.waitKey(1)
