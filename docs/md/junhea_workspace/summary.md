@@ -279,25 +279,35 @@
 #### 클래스
 ###### 클래스 생성 및 사용 예제
 - 다음과 같이 작성하고 호출할 수 있다.(사칙연산)
+
 class FourCal:
+
     def __init__(self):
+
         self.a = 0
+
         self.b = 0
     
     def setdata(self, x, y):
+
         self.a = x
+
         self.b = y
     
     def add(self):
+
         return self.a + self.b
     
     def sub(self):
+
         return self.a - self.b
     
     def mul(self):
+
         return self.a * self.b
     
     def div(self):
+    
         return self.a / self.b
 
 returnn = FourCal()
