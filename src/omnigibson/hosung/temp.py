@@ -1,7 +1,155 @@
 import numpy as np
-import json
+import cv2
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from mapping_utils import extrinsic_matrix, world_to_map
 
-dict = {'picture': {'instance': [{'index': 0, 'coordinates':([422.83708646,   8.01563891, 182.86545495]), 'count': 229}], 'status': 'dynamic', 'color': (255, 0, 255)}, 'straight_chair': {'instance': [{'index': 0, 'coordinates':([334.25923695, -36.42141276, -17.27381877]), 'count': 229}, {'index': 1, 'coordinates':([ -73.64661587, -423.85548012,  -41.34250264]), 'count': 180}, {'index': 2, 'coordinates':([-78.01686855, 167.98764014,   4.64673606]), 'count': 154}, {'index': 3, 'coordinates':([221.3695866 , 164.31736797, -21.66561308]), 'count': 154}, {'index': 4, 'coordinates':([200.39459235,  92.5650496 ,  -2.68886824]), 'count': 232}, {'index': 5, 'coordinates':([ -54.41554587, -378.43557777,  -30.89241775]), 'count': 147}, {'index': 6, 'coordinates':([ -31.57793428, -215.01567433,  -15.81117343]), 'count': 78}], 'status': 'dynamic', 'color': (255, 0, 255)}, 'bottom_cabinet': {'instance': [{'index': 0, 'coordinates':([ 596.52503798, -456.91707985,   -2.27476593]), 'count': 467}, {'index': 1, 'coordinates':([-558.40346705, -151.0490362 ,  -14.24330551]), 'count': 327}, {'index': 2, 'coordinates':([ 91.39680655, 138.76935655, -11.72443176]), 'count': 68}], 'status': 'static', 'color': (0, 255, 255)}, 'standing_tv': {'instance': [{'index': 0, 'coordinates':([192.2601018 ,  43.48589784, -13.56196314]), 'count': 142}, {'index': 1, 'coordinates':([ 286.8555415 , -296.45123398,   82.742953  ]), 'count': 192}, {'index': 2, 'coordinates':([284.48134402, 116.83418285, -18.9674661 ]), 'count': 213}], 'status': 'dynamic', 'color': (255, 0, 255)}, 'loudspeaker': {'instance': [{'index': 0, 'coordinates':([ 368.16190762, -211.58347899,   67.37892453]), 'count': 234}], 'status': 'dynamic', 'color': (255, 0, 255)}, 'plate': {'instance': [{'index': 0, 'coordinates':([49.48472011,  3.9344754 ,  6.88778559]), 'count': 35}], 'status': 'dynamic', 'color': (255, 0, 255)}, 'coffee_table': {'instance': [{'index': 0, 'coordinates':([-162.67596145, -370.81477935,  -46.85914864]), 'count': 253}, {'index': 1, 'coordinates':([-53.09868481, -84.93002097, -13.59007144]), 'count': 74}], 'status': 'static', 'color': (0, 255, 255)}, 'laptop': {'instance': [{'index': 0, 'coordinates':([-170.52559844, -351.072654  ,  -39.38717952]), 'count': 230}], 'status': 'dynamic', 'color': (255, 0, 255)}, 'pot_plant': {'instance': [{'index': 0, 'coordinates':([-133.88039296, -197.21187495,  -20.96769254]), 'count': 236}, {'index': 1, 'coordinates':([-256.16312799,  -56.87902821,   54.50350389]), 'count': 133}, {'index': 2, 'coordinates':([ 238.77140701, -336.25926432,   38.4274942 ]), 'count': 153}], 'status': 'static', 'color': (0, 255, 255)}, 'sofa': {'instance': [{'index': 0, 'coordinates':([-219.74527793, -314.48644433,  -23.97606347]), 'count': 169}, {'index': 1, 'coordinates':([-198.17096902, -322.98273141,  -19.70067672]), 'count': 151}, {'index': 2, 'coordinates':([-102.58047673, -166.14494175,   -9.28883273]), 'count': 76}], 'status': 'static', 'color': (0, 255, 255)}, 'pillow': {'instance': [{'index': 0, 'coordinates':([-327.13423214, -354.87786951,   10.8457109 ]), 'count': 222}], 'status': 'dynamic', 'color': (255, 0, 255)}, 'floor_lamp': {'instance': [{'index': 0, 'coordinates':([-101.38399394,    2.02744108,   15.50707588]), 'count': 51}], 'status': 'dynamic', 'color': (255, 0, 255)}, 'ottoman': {'instance': [{'index': 0, 'coordinates':([-136.22960393,  114.07700977,   -2.37538276]), 'count': 105}], 'status': 'static', 'color': (0, 255, 255)}, 'countertop': {'instance': [{'index': 0, 'coordinates':([-69.50065347,  92.98278714,  29.87461363]), 'count': 63}], 'status': 'static', 'color': (0, 255, 255)}, 'top_cabinet': {'instance': [{'index': 0, 'coordinates':([-9.11303357, 10.01039844,  5.78230381]), 'count': 5}], 'status': 'static', 'color': (0, 255, 255)}, 'cup': {'instance': [{'index': 0, 'coordinates':([-0.91300811,  3.00888855,  1.07779147]), 'count': 2}], 'status': 'dynamic', 'color': (255, 0, 255)}, 'backpack': {'instance': [{'index': 0, 'coordinates':([  44.31463676, -219.39505924,  -30.36098928]), 'count': 73}], 'status': 'dynamic', 'color': (255, 0, 255)}, 'swivel_chair': {'instance': [{'index': 0, 'coordinates':([   5.36706628, -463.16138958,  -15.57553606]), 'count': 135}], 'status': 'dynamic', 'color': (255, 0, 255)}, 'breakfast_table': {'instance': [{'index': 0, 'coordinates':([ 230.6828794 , -246.50443579,   30.70264453]), 'count': 152}, {'index': 1, 'coordinates':([  17.3909883 , -132.28187105,   -6.35312637]), 'count': 35}, {'index': 2, 'coordinates':([ -12.43687696, -133.62998627,   -7.89593506]), 'count': 35}], 'status': 'static', 'color': (0, 255, 255)}, 'shelf': {'instance': [{'index': 0, 'coordinates':([  91.90296166, -267.78009537,    3.66269931]), 'count': 67}, {'index': 1, 'coordinates':([ -57.09743291, -277.46855627,  -17.51780227]), 'count': 75}], 'status': 'static', 'color': (0, 255, 255)}, 'paperback_book': {'instance': [{'index': 0, 'coordinates':([  38.34164352, -125.05990768,   -8.42142208]), 'count': 33}, {'index': 1, 'coordinates':([ 3.05810366, -7.63461921,  0.37766285]), 'count': 2}], 'status': 'dynamic', 'color': (255, 0, 255)}, 'table_lamp': {'instance': [{'index': 0, 'coordinates':([ -17.55890484, -125.75681892,   13.03204661]), 'count': 32}], 'status': 'dynamic', 'color': (255, 0, 255)}, 'baseball_glove': {'instance': [{'index': 0, 'coordinates':([  2.2197608 ,  30.21665702, -19.28429902]), 'count': 37}], 'status': 'dynamic', 'color': (255, 0, 255)}, 'notebook': {'instance': [{'index': 0, 'coordinates':([ 14.37578388, -38.13242961,  -2.77502256]), 'count': 10}], 'status': 'dynamic', 'color': (255, 0, 255)}}
 
-with open(f'uninstructed_robot/src/omnigibson/hosung/test.json', 'w', encoding='utf-8') as f:
-    json.dump(dict, f, indent='\t', ensure_ascii=False)
+pixel = np.load('uninstructed_robot/src/omnigibson/hosung/mapping_temp/pixel_ref.npy')
+print('pixel shape : ', pixel.shape)
+
+pose_ori = np.load('uninstructed_robot/src/omnigibson/hosung/mapping_temp/pose_ori.npy', allow_pickle=True)
+pose = pose_ori[0]
+
+pose4 = np.append(pose, np.array([0]))
+print(pose4)
+pose4[2] *= 3
+print(pose4)
+pose4 = np.reshape(pose4, (1,4))
+print(pose4)
+
+pose_matrix = np.repeat(pose4, [8184], axis=0)
+print(pose_matrix.shape)
+
+
+ori = pose_ori[1]
+
+b = [(176, 496), (288, 288)]
+r = [(199, 330), (265, 454)]
+
+height = 512
+width = 512
+
+
+focal_length = 24.0
+horiz_aperture = 20.954999923706055
+vert_aperture = height/width * horiz_aperture
+
+focal_x = height * focal_length / vert_aperture
+focal_y = width * focal_length / horiz_aperture
+center_x = height * 0.5
+center_y = width * 0.5
+
+K = np.array([[focal_x,0, center_x, 0],
+                [0, focal_y, center_y, 0],
+                [0, 0, 1, 0]])
+
+K_inv = np.linalg.pinv(K)
+print(K_inv.shape)
+
+RT, RT_inv = extrinsic_matrix(ori, pose)
+
+
+
+
+
+
+
+seg = cv2.imread('uninstructed_robot/src/omnigibson/hosung/mapping_temp/seg.png')
+seg_bbox = seg[b[1][1]:b[0][1], b[0][0]:b[1][0]]
+seg_bbox_ratio = seg[r[0][1]:r[1][1], r[0][0]:r[1][0]]
+
+seg_id = np.load('uninstructed_robot/src/omnigibson/hosung/mapping_temp/seg_id.npy')
+print('id : ', seg_id[387,239])
+seg[387,239] = [255,0,0]
+seg_id = (seg_id==21)*1
+seg_id_ratio = seg_id[r[0][1]:r[1][1], r[0][0]:r[1][0]]
+
+depth = np.load('uninstructed_robot/src/omnigibson/hosung/mapping_temp/depth.npy')
+depth_bbox = depth[b[1][1]:b[0][1], b[0][0]:b[1][0]]
+depth_bbox_ratio = depth[r[0][1]:r[1][1], r[0][0]:r[1][0]]
+
+depth_1000 = np.array(depth[r[0][1]:r[1][1], r[0][0]:r[1][0]] * 1000, dtype=int)
+
+pixel_ratio = pixel[r[0][1]:r[1][1], r[0][0]:r[1][0]]
+
+seg_mul = depth_bbox_ratio * seg_id_ratio
+# num_pix = np.sum(seg_id_ratio)
+# depth_avg = np.sum(seg_mul) / num_pix
+# seg_mul = np.reshape(seg_mul, (seg_mul.shape[0],seg_mul.shape[1],1))
+# seg_mul = np.repeat(seg_mul, 4, axis=2)
+
+depth_repeat = np.reshape(seg_mul, (depth_bbox_ratio.shape[0],depth_bbox_ratio.shape[1],1,1))
+depth_repeat = np.repeat(depth_repeat, 3, axis=2)
+print('repeat depth : ', depth_repeat.shape)
+print(depth_repeat)
+scaled_pix_coor = pixel_ratio * depth_repeat
+
+print('scaled pixel coordinates : ', scaled_pix_coor.shape)
+print(scaled_pix_coor)
+
+scaled_pix_coor = np.reshape(scaled_pix_coor, (-1, 3), order='A')
+print('reshaped : ', scaled_pix_coor.shape)
+print(scaled_pix_coor)
+
+scaled_pix_coor = scaled_pix_coor.T
+print('reshaped : ', scaled_pix_coor.shape)
+print(scaled_pix_coor)
+
+intrinsic = np.matmul(K_inv, scaled_pix_coor)
+print('intrinsic : ', intrinsic.shape)
+print(intrinsic)
+
+extrinsic = np.matmul(RT_inv, intrinsic)
+print('extrinsic : ', extrinsic.shape)
+print(extrinsic)
+
+extrinsic = extrinsic.T
+print('extrinsic : ', extrinsic.shape)
+print(extrinsic)
+
+final = extrinsic + pose4
+
+final = np.reshape(final, (124, 66, 4))
+print()
+print(final)
+
+# final = final * seg_mul
+# print()
+# print(final)
+
+
+# while True:
+#     cv2.imshow('seg', seg)
+#     # cv2.imshow('seg_id', seg_id)
+#     cv2.imshow('seg_bbox', seg_bbox)
+#     cv2.imshow('seg_bbox_ratio', seg_bbox_ratio)
+#     cv2.waitKey(1)
+map2d_pixel = np.zeros([1024, 1024,3], dtype=np.uint8)
+
+
+print(int(final.size / 4))
+for i in range(124):
+    for j in range(66):
+        cv2.circle(map2d_pixel,world_to_map(final[i,j]), 
+                                1, 
+                                (255,255,255), 
+                                -1)
+
+while True:
+    cv2.imshow('seg', seg)
+    # cv2.imshow('seg_id', seg_id)
+    cv2.imshow('seg_bbox', seg_bbox)
+    cv2.imshow('seg_bbox_ratio', seg_bbox_ratio)
+    cv2.imshow('img', map2d_pixel)
+    cv2.waitKey(1)
+
+
+
+
+
+
+
+
+
+

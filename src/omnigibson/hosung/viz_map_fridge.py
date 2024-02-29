@@ -191,6 +191,7 @@ def main():
         c_abs_pose, c_abs_ori = agent_pos + c_relative_pos, quat_multiply(agent_ori, c_relative_ori)
 
         depth_map = obs['robot0']['robot0:eyes_Camera_sensor_depth_linear']
+        seg_id = obs['robot0']['robot0:eyes_Camera_sensor_seg_instance']
         segment_id_map = np.array(obs['robot0']['robot0:eyes_Camera_sensor_seg_instance'], dtype=np.uint8)
         segment_id_map2 = cv2.cvtColor(np.array(obs['robot0']['robot0:eyes_Camera_sensor_seg_instance']*2.55, dtype=np.uint8), cv2.COLOR_GRAY2RGB)
 
@@ -204,7 +205,7 @@ def main():
             #check segment data upon each point to find the 2d bounding box
             for x in range(0, sensor_image_width, pix_stride):
                 for y in range(0, sensor_image_height, pix_stride):
-                    if segment_id_map[y,x] in [16, 43]:
+                    if segment_id_map[y,x] in [21, 43]:
                         #finding farthest top, bottom, left, right points
                         segment_id_list, segment_bbox = TBLR_check([x,y],segment_id_map[y,x],segment_id_list, segment_bbox)
 
@@ -214,12 +215,16 @@ def main():
                 #     continue
                 # else:
                 cv2.rectangle(segment_id_map2, (segment['T_coor'][0],segment['R_coor'][1]), (segment['B_coor'][0],segment['L_coor'][1]), (0, 255, 0), 2)
+                print('coordinates for bbox')
+                print([(segment['T_coor'][0],segment['R_coor'][1]), (segment['B_coor'][0],segment['L_coor'][1])])
                 mid_point = np.array([(segment['T_coor'][0]+segment['B_coor'][0])/2, (segment['R_coor'][1]+segment['L_coor'][1])/2], dtype=int)
 
                 #for selecting area of interest (ratio - 5:3)
                 width = int((segment['R_coor'][1]-segment['L_coor'][1])*0.3)
                 height = int((segment['B_coor'][0]-segment['T_coor'][0])*0.3)
                 cv2.rectangle(segment_id_map2,[mid_point[0]-height, mid_point[1]-width],[mid_point[0]+height, mid_point[1]+width], (0, 255, 255), 2)
+                print('coordinates for bbox ratio')
+                print([(mid_point[0]-height, mid_point[1]-width),(mid_point[0]+height, mid_point[1]+width)])
 
                 #slicing for faster calculation
                 segment_array = segment_id_map[:, (mid_point[0]-height):(mid_point[0]+height)][mid_point[1]-width:mid_point[1]+width, :]
@@ -262,6 +267,11 @@ def main():
                         OBJECT_DATA['final']['count'] += 1
         
         cv2.imshow('Segmentation', segment_id_map2)
+        cv2.imwrite(f'uninstructed_robot/src/omnigibson/hosung/mapping_temp/seg.png', segment_id_map2)
+        np.save(f'uninstructed_robot/src/omnigibson/hosung/mapping_temp/seg_id', seg_id)
+        np.save(f'uninstructed_robot/src/omnigibson/hosung/mapping_temp/depth', depth_map)
+        np.save(f'uninstructed_robot/src/omnigibson/hosung/mapping_temp/pose_ori', np.array([c_abs_pose, c_abs_ori]))
+
         cv2.imshow('2D Map', map2d_pixel_result)
         cv2.waitKey(1)
 

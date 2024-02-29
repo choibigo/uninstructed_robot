@@ -84,19 +84,8 @@ def main():
 
     _, K_inv = intrinsic_matrix(env.robots[0].sensors['robot0:eyes_Camera_sensor'], sensor_image_width, sensor_image_height)
 
-    focal_length = env.robots[0].sensors['robot0:eyes_Camera_sensor'].get_attribute('focalLength')
-    print(focal_length)
-
     # trigger for scanning : 'B'
     count = 0
-
-    #RGB
-    color_palette = [(255, 255, 0), #0 : relax
-                     (255, 128, 0), #1 : entertain
-                     (128, 255, 0), #2 : work(office, study)
-                     (0, 255, 255), #3 : bathroom
-                     (51, 51, 255), #4 : kitchen
-                     (255, 51, 255)] #5 : dinning
 
     ref_pixel = [[0,511], [511, 511]]
     Zc = [0, 0, 0]
@@ -118,7 +107,6 @@ def main():
                     else:
                         corners = [world_to_map(corners[0]), world_to_map(corners[3])]
                         cv2.rectangle(map2d_pixel, corners[0], corners[1], (0, 255, 0), 1)
-
 
     while True:
 
