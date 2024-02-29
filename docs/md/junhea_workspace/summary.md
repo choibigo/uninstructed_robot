@@ -361,9 +361,9 @@ class A:
 - from (모듈이름) import (함수이름) 이렇게 불러오면 모듈이름.함수이름() 이렇게 할 필요 없이 함수이름() 만 적어서 사용이 가능하다.
 - 모듈 안에 있는 모든 함수들을 함수이름() 만 작성하여 사용하고싶다면 from (모듈이름) import * 과 같이 적으면 된다. *은 '모든 것' 을 의미한다.
 
-###### __name__ 과 __main__의 의미
+###### \__name__ 과 __main__의 의미
 - 앞에서 불러온 모듈 내부에 def된 함수 외에 print()나 if()처럼 일반적인 함수로 이루어진 다른 작업들이 있을 때 import를 하면서 해당 작업들이 그냥 진행될 수 있다.
-- 그래서 if __name__ == '__main__' 과 같이 if문을 이용하여 해당 작업들을 제한할 수 있다.
+- 그래서 if \__name__ == '\__main__' 과 같이 if문을 이용하여 해당 작업들을 제한할 수 있다.
 - __name__은 해당 문구가 작성된 파일.py의 이름이고 __main__은 지금 실행중인 프로그램의 파일.py의 이름이다.
 - 즉 __name__에는 항상 import된 파일의 이름이 저장되어있고 __main__에는 항상 실행중인 프로그램의 이름이 저장되므로 __name__이 작성된 파일을 직접 실행시키지 않으면 위의 if문은 참이 될 수 없다.
 
@@ -374,26 +374,70 @@ class A:
 
 #### 패키지
 - 패키지란 관련 있는 모듈의 집합을 의미한다. 패키지는 파이썬 모듈을 계층적으로 관리할 수 있게 해준다.
-- 설명에 앞서서 파일 구성을 다음과 같이 한다고 가정하자. mainfile{__init__.py , subfirst{__init__.py , fir.py}, subsec{__init__.py , sec.py}}
+- 설명에 앞서서 파일 구성을 다음과 같이 한다고 가정하자. mainfile{\__init__.py , subfirst{\__init__.py , fir.py}, subsec{\__init__.py , sec.py}}
 - fir.py 안에는 def firfir(): 이 있고 sec.py 안에는 def secsec(): 가 있다고 하자.
 - 또한 처음 프로그램을 시작하는 디렉토리는 mainfile 상위폴더라고 하자.
 ###### 패키지 안의 함수 실행하기
 - fir.py 모듈을 import하여 firfir()을 실행시키는 방법은 다음과 같다.
-- import mainfile.subfirst.fir
-- mainfile.subfirst.fir.firfir()
+
+import mainfile.subfirst.fir
+
+mainfile.subfirst.fir.firfir()
+
 
 - 두 번째로 firfir() 함수를 실행시키되 from...import 하는 방법이다.
-- from mainfile.subfirst import fir
-- fir.firfir()
+
+from mainfile.subfirst import fir
+
+fir.firfir()
+
 
 - 세 번째로 firfir() 함수를 직접 import 하는 방법이다.
-- from mainfile.subfirst.fir import firfir
-- firfir()
+
+from mainfile.subfirst.fir import firfir
+
+firfir()
+
 
 - 하지만 다음과 같이 사용하는 것은 불가능하다.
-- import mainfile
-- mainfile.subfirst.fir.firfir()
-- 위와 같이 import를 하면 mainfile 내부의 __init__.py에서 정의한 것만 참조할 수 있다.
 
-###### __init__.py 의 용도
-- 
+import mainfile
+
+mainfile.subfirst.fir.firfir()
+
+- 위와 같이 import를 하면 mainfile 내부의 \__init__.py에서 정의한 것만 참조할 수 있다.
+
+###### \__init__.py 의 용도
+- mainfile 내부의 \__init__.py 안에 변수 A = 1 과 def maintest(): 가 있다고 하자
+- 이와 같이 작성하면 import mainfile 만 작성하여도 \__init__.py 에서 정의한 변수와 함수는 사용이 가능하다.
+- 또한 패키지 내부의 다른 모듈을 미리 import 하여 패키지를 사용하는 코드에서 간편하게 접근이 가능해진다.
+
+from .subsec.sec import secsec
+
+- 다음과 같이 mainfile 내부의 \__init__.py 내부에 작성이 되어있다면
+
+import mainfile
+
+mainfile.secsec()
+
+- 이와 같이 작성이 가능해진다.
+- 그리고 \__init__.py에는 패키지를 처음 불러울 때 실행되어야 하는 코드를 작성할 수 있다.
+- 처음 불러올 때 실행되는 코드는 예를 들어 mainfile의 init에 작성되어 있다고 하면 subfirst나 subsec와 같이 하위 모듈을 불러올때도 실행된다.
+- 하지만 subfirst를 불러옴으로 mainfile의 init에 있는 첫실행 코드를 불러왔다면 subsec를 불러와도 다시 실행되지 않는다.
+- 다음과 같이 코드를 작성하면
+
+from mainfile.subsec import *
+
+- subsec 내부의 \__init__.py 에서 \__all__ = ['sec', '파일이름', '파일이름2', ...] 리스트 내부에 적혀져 있는 파일만 import 된다.
+
+###### relative 패키지
+- sec.py 내부에서 fir.py를 import 하려고 할 때 다음의 두 줄의 문구는 같은 역할을 한다.
+
+from mainfile.subfirst.fir import firfir()
+
+from ..subfirst.fir import firfir()
+
+- 여기에서 ..은 sec.py 파일의 부모 디렉터리를 의미한다. (점 하나는 현재 디렉터리를 의미한다.) fir.py 의 부모 디렉토리와 sec.py 부모 디렉터리가 같으므로 사용이 가능하다.
+- fir.py의 현재 디렉터리는 subfirst이며 부모 디렉터리는 mainfile이 된다.
+
+#### 예외 처리
