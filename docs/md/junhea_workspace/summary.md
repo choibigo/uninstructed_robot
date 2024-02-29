@@ -280,53 +280,63 @@
 ###### 클래스 생성 및 사용 예제
 - 다음과 같이 작성하고 호출할 수 있다.(사칙연산)
 
-class FourCal:
+    class FourCal:
 
-    def __init__(self):
+        def __init__(self):
 
-        self.a = 0
+            self.a = 0
 
-        self.b = 0
-    
-    def setdata(self, x, y):
+            self.b = 0
+        
+        def setdata(self, x, y):
 
-        self.a = x
+            self.a = x
 
-        self.b = y
-    
-    def add(self):
+            self.b = y
+        
+        def add(self):
 
-        return self.a + self.b
-    
-    def sub(self):
+            return self.a + self.b
+        
+        def sub(self):
 
-        return self.a - self.b
-    
-    def mul(self):
+            return self.a - self.b
+        
+        def mul(self):
 
-        return self.a * self.b
-    
-    def div(self):
-    
-        return self.a / self.b
+            return self.a * self.b
+        
+        def div(self):
 
-returnn = FourCal()
-returnn.setdata(3, 4)
-print(returnn.add())
-print(returnn.sub())
-print(returnn.mul())
-print(returnn.div())
+            return self.a / self.b
+
+    returnn = FourCal()
+
+    returnn.setdata(3, 4)
+
+    print(returnn.add())
+
+    print(returnn.sub())
+
+    print(returnn.mul())
+
+    print(returnn.div())
 
 ###### 클래스 상속
 - 다음과 같이 작성하면 새로운 클래스 이름으로 상속받은 클래스의 내용을 사용할 수 있다. class 새로운_클래스_이름(상속할_클래스_이름)
 - 다음과 같이 작성하면 상속받은 클래스에 더하여 새로운 기능을 새로운 클래스에 추가할 수 있다.
-class More(FourCal):
-    def new(self):
-        ...
-        return ???
 
-a = More()
-a.new()
+    class More(FourCal):
+
+        def new(self):
+
+            ...
+
+            return ???
+
+    a = More()
+
+    a.new()
 
 - 이 기능은 기존의 클래스를 그대로 두고 기능을 추가할 때 사용한다.
 
