@@ -244,3 +244,22 @@ def occupancy_grid_mapping(occupancy_grid):
                 return horizontal, occupancy_grid, True
 
     return 2, occupancy_grid, False
+
+def check_3d_bbox_inbound(object, mid_point):
+    if object['3d_bbox'][0] < mid_point[0] < object['3d_bbox'][1] and object['3d_bbox'][2] < mid_point[1] < object['3d_bbox'][3] and object['3d_bbox'][4] < mid_point[2] < object['3d_bbox'][5]:
+        return True
+    else:
+        return False
+    
+def bbox_and_midpoint(points):
+    max_x = np.max(points[:,0])
+    min_x = np.min(points[:,0])
+    max_y = np.max(points[:,1])
+    min_y = np.min(points[:,1])
+    max_z = np.max(points[:,2])
+    min_z = np.min(points[:,2])
+    
+    mid_point = [(min_x+max_x)/2, (min_y+max_y)/2, (min_z+max_z)/2]
+    bbox = [min_x, max_x, min_y, max_y, min_z, max_z]
+
+    return bbox, mid_point

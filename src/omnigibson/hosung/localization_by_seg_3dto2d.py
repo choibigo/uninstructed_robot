@@ -193,8 +193,7 @@ def main():
         depth_map = obs['robot0']['robot0:eyes_Camera_sensor_depth_linear']
         segment_id_map = np.array(obs['robot0']['robot0:eyes_Camera_sensor_seg_instance'], dtype=np.uint8)
         segment_id_map2 = cv2.cvtColor(np.array(obs['robot0']['robot0:eyes_Camera_sensor_seg_instance']*2.55, dtype=np.uint8), cv2.COLOR_GRAY2RGB)
-        # seg_id = obs['robot0']['robot0:eyes_Camera_sensor_seg_instance']
-        #Object position detecting process
+
         if activate_scan :
             segment_id_list = []
             segment_bbox = []
@@ -239,9 +238,8 @@ def main():
 
                     extrinsic = np.matmul(RT_inv, intrinsic)
 
-
                     extrinsic = extrinsic.T
-                    # new_pose4 = np.array([pose4[0][1], pose4[0][0], pose4[0][2], pose4[0][3]])
+
                     pose_matrix = np.repeat(pose4, [(segment['R_coor'][1]-segment['L_coor'][1])*(segment['B_coor'][0]-segment['T_coor'][0])], axis=0)
 
                     final = extrinsic + pose_matrix
