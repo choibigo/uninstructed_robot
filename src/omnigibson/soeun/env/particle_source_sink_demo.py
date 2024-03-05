@@ -1,6 +1,3 @@
-import sys
-sys.path.append(r'/home/bluepot/dw_workspace/git/OmniGibson')
-
 import numpy as np
 
 import omnigibson as og
@@ -15,19 +12,20 @@ gm.ENABLE_HQ_RENDERING = True
 
 
 def main(random_selection=False, headless=False, short_exec=False):
+    # og.log.info(f"Demo {__file__}\n    " + "*" * 80 + "\n    Description:\n" + main.__doc__ + "*" * 80)
+
     # Create the scene config to load -- empty scene
     cfg = {
         "scene": {
             "type": "Scene",
         }
     }
-
     # Define objects to load into the environment
-    cup_cfg = dict(
+    bowl_cfg = dict(
         type="DatasetObject",
-        name="cup",
-        category="cup",
-        model="lfxtqa",
+        name="bowl",
+        category="bowl",
+        model="adciys",
         bounding_box=[2.427, 0.625, 1.2],
         abilities={
             "toggleable": {},
@@ -37,11 +35,16 @@ def main(random_selection=False, headless=False, short_exec=False):
                 },
                 "initial_speed": 0.0,               # Water merely falls out of the spout
             },
+            "particleSink": {
+                "conditions": {
+                    "water": [],  # No conditions, always sinking nearby particles
+                },
+            },
         },
         position=[0.0, 0, 0.42],
     )
 
-    cfg["objects"] = [cup_cfg]
+    cfg["objects"] = [bowl_cfg]
 
     # Create the environment!
     env = og.Environment(configs=cfg, action_timestep=1/60., physics_timestep=1/60.)
@@ -52,40 +55,15 @@ def main(random_selection=False, headless=False, short_exec=False):
         orientation=np.array([0.49909498, 0.15201752, 0.24857062, 0.81609284]),
     )
 
-    # Take a few steps to let the objects settle, and then turn on the cup
+    # Take a few steps to let the objects settle, and then turn on the sink
     for _ in range(10):
         env.step(np.array([]))              # Empty action since no robots are in the scene
 
-    cup = env.scene.object_registry("name", "cup")
-    print('\ncheck: \n',cup)
-    assert cup.states[object_states.ToggledOn].set_value(True)
+    bowl = env.scene.object_registry("name", "bowl")
+    assert bowl.states[object_states.ToggledOn].set_value(True)
 
-    # Take a step, and save the state
-    env.step(np.array([]))
-    initial_state = og.sim.dump_state()
-
-    # Main simulation loop.
-    max_steps = 1000
-    max_iterations = -1 if not short_exec else 1
-    iteration = 0
-
-    try:
-        while iteration != max_iterations:
-            # Keep stepping until table or bowl are clean, or we reach 1000 steps
-            steps = 0
-            while steps != max_steps:
-                steps += 1
-                env.step(np.array([]))
-            og.log.info("Max steps reached; resetting.")
-
-            # Reset to the initial state
-            og.sim.load_state(initial_state)
-
-            iteration += 1
-
-    finally:
-        # Always shut down environment at the end
-        env.close()
+    while True:
+        env.step(np.array([]))
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 import sys
-# sys.path.append(r'/home/bluepot/dw_workspace/git/OmniGibson')
+sys.path.append(r'/home/bluepot/dw_workspace/git/OmniGibson')
 sys.path.append(r'/home/starry/workspaces/dw_workspace/git/OmniGibson')
 import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
@@ -13,6 +13,7 @@ from omnigibson import object_states
 from omnigibson.macros import gm
 from omnigibson.utils.ui_utils import KeyboardRobotController
 from omnigibson.utils.constants import ParticleModifyCondition
+from omnigibson.systems import get_system
 
 
 gm.USE_GPU_DYNAMICS = True
@@ -20,13 +21,16 @@ gm.ENABLE_HQ_RENDERING = True
 gm.ENABLE_FLATCACHE = True
 gm.FORCE_LIGHT_INTENSITY = 150000
 scene_name = 'Rs_int'
-scene_number = 4
+scene_number = 0
 
 
 if __name__ == "__main__":
     # object config
     object_load_folder = os.path.join(os.path.split(__file__)[0], f'{scene_name}_{scene_number}')
     object_list = []
+    systems = (
+        get_system("water"),
+    )
     for json_name in os.listdir(object_load_folder):
         with open(os.path.join(object_load_folder, json_name), 'r') as json_file:
             dict_from_json = json.load(json_file)
@@ -51,6 +55,9 @@ if __name__ == "__main__":
     cfg = {"scene": scene_cfg,"objects":object_list}
 
     env = og.Environment(configs=cfg, action_timestep=1/60., physics_timestep=1/60.)
+    print('a')
+    system = get_system("water")
+    
     og.sim.viewer_camera.set_position_orientation(
         position=np.array([0.22, -1.6, 2.29]),
         orientation=np.array([0.29, -0.033, -0.1, 0.949]),

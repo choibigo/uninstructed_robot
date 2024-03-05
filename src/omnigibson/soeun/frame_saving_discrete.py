@@ -97,14 +97,9 @@ def main():
         c_abs_pose, c_abs_ori = agent_pos + c_relative_pos, quat_multiply(agent_ori, c_relative_ori)
         
 
-        if str(keyboard_input) == 'KeyboardInput.B':
-            if save == True:
-                save = False
-                print('Finished')
-            else:
-                save = True
-                count = 0
-                print('Saving')
+        if str(keyboard_input) == 'KeyboardInput.P':
+            save = True
+            print('Saving')
 
         if save == True:    
             formatted_count = "{:08}".format(count)
@@ -124,12 +119,12 @@ def main():
             np.save(depth_path, obs['robot0']['robot0:eyes_Camera_sensor_depth_linear'])
             np.save(seg_path, np.array(obs['robot0']['robot0:eyes_Camera_sensor_seg_instance'], dtype=np.uint8))
             np.save(pose_ori, np.array([c_abs_pose, c_abs_ori]))
+            save = False
+            count += 1
+            print(count)
 
-
-        cv2.imshow('2D Map', cv2.cvtColor(obs['robot0']['robot0:eyes_Camera_sensor_rgb'], cv2.COLOR_BGR2RGB))
+        # cv2.imshow('2D Map', cv2.cvtColor(obs['robot0']['robot0:eyes_Camera_sensor_rgb'], cv2.COLOR_BGR2RGB))
         cv2.waitKey(1)
-        count += 1
-        print(count)
     env.close()
 
 if __name__ == "__main__":
