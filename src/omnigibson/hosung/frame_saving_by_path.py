@@ -17,7 +17,7 @@ from omnigibson.utils.transform_utils import quat_multiply
 
 from mapping_utils import *
 
-save_root_path = f"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/test_frames/frames_24-{datetime.today().month}-{datetime.today().day}/"
+save_root_path = f"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/test_frames/frames_path_24-{datetime.today().month}-{datetime.today().day}/"
 os.makedirs(save_root_path, exist_ok=True)
 
 OBJECT_LABEL_GROUNDTRUTH = []
@@ -32,7 +32,7 @@ gm.ENABLE_FLATCACHE=False
 env_name = 'Rs_int'
 env_number = 4
 scan_tik = 585
-pix_stride = 8
+pix_stride = 4
 
 
 def main():
@@ -90,31 +90,34 @@ def main():
 
     c_relative_pos, c_relative_ori = env.robots[0].sensors['robot0:eyes_Camera_sensor'].get_position_orientation()
 
-    # for repeat in range(5):
-    #     action = action_generator.get_teleop_action()
-    #     obs, reward, done, info = env.step(action=action)
-    #     cam = og.sim.viewer_camera
-    #     cam.add_modality("bbox_3d")
-    #     bbox_obs = cam.get_obs()
+    for repeat in range(5):
+        action = action_generator.get_teleop_action()
+        obs, reward, done, info = env.step(action=action)
+        cam = og.sim.viewer_camera
+        cam.add_modality("bbox_3d")
+        bbox_obs = cam.get_obs()
     
-    #     if repeat == 4 :
-    #         OBJECT_LABEL_GROUNDTRUTH, EXCEPTION = groundtruth_for_reference(bbox_obs['bbox_3d'], f'{env_name}_{repeat}')
+        if repeat == 4 :
+            OBJECT_LABEL_GROUNDTRUTH, EXCEPTION = groundtruth_for_reference(bbox_obs['bbox_3d'], f'{env_name}_{repeat}')
 
 
     save = False
     count = 0
 
     color_palette = [(255, 0, 0), (0, 255, 255), (255, 255, 0), (0, 255, 0), (0, 0, 255), (255, 255, 255), (128, 255, 128), (255, 128, 128)]
-    action_path = []
-    input_keyboard = []
-    # action_path = np.load('uninstructed_robot/src/omnigibson/hosung/mapping_temp/action_path')
-    keyboard_count = 0
-    while True:
-        
-        action = action_generator.get_teleop_action()
-        action_path.append(action)
+    # action_path = []
+    # input_keyboard = []
+    # with open('uninstructed_robot/src/omnigibson/hosung/mapping_temp/keyboard_path.json', 'r') as json_file:
+    #     input_keyboard = json.load(json_file)
+    action_path = np.load('uninstructed_robot/src/omnigibson/hosung/mapping_temp/action_path.npy')
+    # keyboard_count = 0
 
-        keyboard_input = action_generator.current_keypress
+    for idx, action in enumerate(action_path):
+        
+        # action = action_generator.get_teleop_action()
+        # action_path.append(action)
+
+        # keyboard_input = action_generator.current_keypress
 
         obs, reward, done, info = env.step(action=action)
         agent_pos, agent_ori = env.robots[0].get_position_orientation()
@@ -125,19 +128,19 @@ def main():
         rgb_map = cv2.cvtColor(obs['robot0']['robot0:eyes_Camera_sensor_rgb'], cv2.COLOR_BGR2RGB)
 
         
-        if str(keyboard_input) == 'KeyboardInput.B':
-            input_keyboard.append((keyboard_count,str(keyboard_input)))
+        if idx == 466:
+            # input_keyboard.append((keyboard_count,str(keyboard_input)))
             save = True
             count = 0
             print('Saving')
 
-        if str(keyboard_input) == 'KeyboardInput.N':
-            input_keyboard.append((keyboard_count,str(keyboard_input)))
+        if idx == 2261:
+            # input_keyboard.append((keyboard_count,str(keyboard_input)))
             save = False
             print('Finished')
-            np.save('uninstructed_robot/src/omnigibson/hosung/mapping_temp/action_path', action_path)
-            with open('uninstructed_robot/src/omnigibson/hosung/mapping_temp/keyboard_path.json', 'w', encoding='utf-8') as f:
-                json.dump(input_keyboard, f, indent='\t', ensure_ascii=False)
+            # np.save('uninstructed_robot/src/omnigibson/hosung/mapping_temp/action_path', action_path)
+            # with open('uninstructed_robot/src/omnigibson/hosung/mapping_temp/keyboard_path.json', 'w', encoding='utf-8') as f:
+            #     json.dump(input_keyboard, f, indent='\t', ensure_ascii=False)
 
         if save :
             formatted_count = "{:08}".format(count)
@@ -151,42 +154,45 @@ def main():
             objects_bbox_path = os.path.join(extra_info_in_frame, 'objects_bbox')
             bbox_image_path = os.path.join(extra_info_in_frame, f"{formatted_count}.png")
 
-            # segment_id_list = []
-            # segment_bbox = []
+            segment_id_list = []
+            segment_bbox = []
             objects_in_frame = []
 
             cv2.imwrite(image_path, rgb_map)
 
-            # #check segment data upon each point to find the 2d bounding box
-            # for x in range(0, sensor_image_width, pix_stride):
-            #     for y in range(0, sensor_image_height, pix_stride):
-            #         if segment_id_map[y,x] not in EXCEPTION:
-            #             #finding farthest top, bottom, left, right points
-            #             segment_id_list, segment_bbox = TBLR_check([x,y],segment_id_map[y,x],segment_id_list, segment_bbox)
+            #check segment data upon each point to find the 2d bounding box
+            for x in range(0, sensor_image_width, pix_stride):
+                for y in range(0, sensor_image_height, pix_stride):
+                    if segment_id_map[y,x] not in EXCEPTION:
+                        #finding farthest top, bottom, left, right points
+                        segment_id_list, segment_bbox = TBLR_check([x,y],segment_id_map[y,x],segment_id_list, segment_bbox)
 
-            # for idx, segment in enumerate(segment_bbox):
-            #     #rejecting objects uncaptured as a whole within the frame
-            #     if TBLR_frame_check(segment, sensor_image_height, sensor_image_width):
-            #         continue
-            #     else:
-            #         cv2.rectangle(rgb_map, (segment['T_coor'][0],segment['R_coor'][1]), (segment['B_coor'][0],segment['L_coor'][1]), color_palette[idx%8], 1)
-            #         label = OBJECT_LABEL_GROUNDTRUTH[f'{segment_id_list[idx]}']['label']
-            #         bbox = [segment['L_coor'][1]/sensor_image_width, segment['B_coor'][0]/sensor_image_height, 
-            #                 segment['R_coor'][1]/sensor_image_width, segment['T_coor'][0]/sensor_image_height]
-            #         objects_in_frame.append({f'{label}' : bbox
-            #         })
+            for idx, segment in enumerate(segment_bbox):
+                #rejecting objects uncaptured as a whole within the frame
+                if TBLR_frame_check(segment, sensor_image_height, sensor_image_width):
+                    continue
+                else:
+                    cv2.rectangle(rgb_map, (segment['T_coor'][0],segment['R_coor'][1]), (segment['B_coor'][0],segment['L_coor'][1]), color_palette[idx%8], 1)
+                    label = OBJECT_LABEL_GROUNDTRUTH[f'{segment_id_list[idx]}']['label']
+                    bbox = {'LT_x' : segment['T_coor'][0]/sensor_image_height,
+                            'LT_y' : segment['L_coor'][1]/sensor_image_width,
+                            'RB_x' : segment['B_coor'][0]/sensor_image_height,
+                            'RB_y' : segment['R_coor'][1]/sensor_image_width
+                            }
+                    objects_in_frame.append({f'{label}' : bbox
+                    })
 
-            # cv2.imshow('img', rgb_map)
+            cv2.imshow('img', rgb_map)
 
-            # cv2.imwrite(bbox_image_path, rgb_map)
+            cv2.imwrite(bbox_image_path, rgb_map)
             np.save(depth_path, obs['robot0']['robot0:eyes_Camera_sensor_depth_linear'])
             np.save(seg_path, np.array(obs['robot0']['robot0:eyes_Camera_sensor_seg_instance'], dtype=np.uint8))
             np.save(pose_ori_path, np.array([c_abs_pose, c_abs_ori]))
-            # with open(f'{objects_bbox_path}.json', 'w', encoding='utf-8') as f:
-            #     json.dump(objects_in_frame, f, indent='\t', ensure_ascii=False)
-            # cv2.waitKey(1)
+            with open(f'{objects_bbox_path}.json', 'w', encoding='utf-8') as f:
+                json.dump(objects_in_frame, f, indent='\t', ensure_ascii=False)
+            cv2.waitKey(1)
         count += 1
-        keyboard_count += 1
+        # keyboard_count += 1
     env.close()
 
 if __name__ == "__main__":

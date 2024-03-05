@@ -33,6 +33,8 @@ def groundtruth_for_reference(bbox_3d, env_name):
         json.dump(object_groundtruth, f, indent='\t', ensure_ascii=False)
     with open(f'uninstructed_robot/src/omnigibson/hosung/groundtruth_per_env/gt_full_{env_name}.json', 'w', encoding='utf-8') as f:
         json.dump(object_full, f, indent='\t', ensure_ascii=False)
+    with open(f'uninstructed_robot/src/omnigibson/hosung/groundtruth_per_env/exception_{env_name}.json', 'w', encoding='utf-8') as f:
+        json.dump(exception_list, f, indent='\t', ensure_ascii=False)
 
     return object_groundtruth, exception_list
 
@@ -43,6 +45,16 @@ def world_to_map(list_of_coor):
     map_pixel_coor_x = (((y_coor / 5) * 512 ) + 511) // 1
     map_pixel_coor_y = (((x_coor / 5) * 512 ) + 511) // 1
     return int(map_pixel_coor_x), int(map_pixel_coor_y)
+
+def world_to_map_3d(list_of_coor):
+    x_coor = list_of_coor[0]
+    y_coor = list_of_coor[1]
+    z_coor = list_of_coor[2]
+    map_pixel_coor_x = (((y_coor / 5) * 512 ) + 511) // 1
+    map_pixel_coor_y = (((x_coor / 5) * 512 ) + 511) // 1
+    map_pixel_coor_z = (((z_coor / 5) * 512 ) + 511) // 1
+    
+    return int(map_pixel_coor_x), int(map_pixel_coor_y), int(map_pixel_coor_z)
 
 #return distance between two coordinates
 def two_point_distance(coor1, coor2):
@@ -245,8 +257,10 @@ def occupancy_grid_mapping(occupancy_grid):
 
     return 2, occupancy_grid, False
 
-def check_3d_bbox_inbound(object, mid_point):
+def check_3d_bbox_inbound(object, mid_point, coor_list):
     if object['3d_bbox'][0] < mid_point[0] < object['3d_bbox'][1] and object['3d_bbox'][2] < mid_point[1] < object['3d_bbox'][3] and object['3d_bbox'][4] < mid_point[2] < object['3d_bbox'][5]:
+        return True
+    elif coor_list[0] < object['mid_point'][0] < coor_list[1] and coor_list[2] < object['mid_point'][1] < coor_list[3] and coor_list[4] < object['mid_point'][2] < coor_list[5]:
         return True
     else:
         return False
