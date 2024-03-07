@@ -35,7 +35,6 @@ OBJECT_LABEL_GROUNDTRUTH = []
 
 EXCEPTION = []
 
-#dictionary to keep track of all detected objects and its data
 OBJECT_DATA = {}
 
 PIXEL_REF = np.load('uninstructed_robot/src/omnigibson/hosung/mapping_temp/pixel_ref.npy')

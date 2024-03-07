@@ -1,11 +1,27 @@
 import numpy as np
 import json
 
+PIXEL_REF_X = np.load('uninstructed_robot/src/omnigibson/hosung/load_data/pixel_ref_x.npy')
+PIXEL_REF_Y = np.load('uninstructed_robot/src/omnigibson/hosung/load_data/pixel_ref_y.npy')
+
+
+
+
+
+def test():
+    print(1)
+
 #for creating groundthuth json file to be used as a reference 
 def groundtruth_for_reference(bbox_3d, env_name):
+    """
+        bbox_3d : bbox_obs['bbox_3d'] tupple of all objects from og.sim.viewer.camera modality
+        env_name : loaded environment - for saving purpose
+    """
+    
     exception_list = [0]
     object_groundtruth = {}
     object_full = {}
+    
     for i in range(len(bbox_3d)):
         if bbox_3d[i][2] in ['bottom_cabinet', 'breakfast_table', 'coffee_table', 'pot_plant', 'shelf', 'sofa', 'ottoman', 'trash_can',
                         'carpet', 'countertop', 'door', 'fridge', 'mirror', 'top_cabinet','towel_rack']:
@@ -13,27 +29,29 @@ def groundtruth_for_reference(bbox_3d, env_name):
                 object_groundtruth[f'{int(bbox_3d[i][0])}'] = {
                                 'label' : bbox_3d[i][2],
                                 'status' : 'static',
-                                'color' : (0,255,255)
+                                'color' : (0,255,255),
+                                'corner_coordinates' : bbox_3d[i][13].tolist()
                 }
         elif bbox_3d[i][2] in ['walls', 'ceilings', 'floors', 'agent', 'window', 'electric_switch']:
                 object_groundtruth[f'{int(bbox_3d[i][0])}']={
                                 'label' : bbox_3d[i][2],
                                 'status' : 'Non-object',
-                                'color' : (255,255,0)
+                                'color' : (255,255,0),
+                                'corner_coordinates' : bbox_3d[i][13].tolist()
                 }
                 exception_list.append(int(bbox_3d[i][0]))
         else:
                 object_groundtruth[f'{int(bbox_3d[i][0])}']={
                                 'label' : bbox_3d[i][2],
                                 'status' : 'dynamic',
-                                'color' : (255,0,255)
+                                'color' : (255,0,255),
+                                'corner_coordinates' : bbox_3d[i][13].tolist()
                 }
-        object_full[f'{i}']=[i, bbox_3d[i][2], bbox_3d[i][13].tolist()]
-    with open(f'uninstructed_robot/src/omnigibson/hosung/groundtruth_per_env/gt_{env_name}.json', 'w', encoding='utf-8') as f:
+
+    with open(f'uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_name}.json', 'w', encoding='utf-8') as f:
         json.dump(object_groundtruth, f, indent='\t', ensure_ascii=False)
-    with open(f'uninstructed_robot/src/omnigibson/hosung/groundtruth_per_env/gt_full_{env_name}.json', 'w', encoding='utf-8') as f:
-        json.dump(object_full, f, indent='\t', ensure_ascii=False)
-    with open(f'uninstructed_robot/src/omnigibson/hosung/groundtruth_per_env/exception_{env_name}.json', 'w', encoding='utf-8') as f:
+
+    with open(f'uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_name}_exception.json', 'w', encoding='utf-8') as f:
         json.dump(exception_list, f, indent='\t', ensure_ascii=False)
 
     return object_groundtruth, exception_list
@@ -167,95 +185,36 @@ def find_3d_mid_point(corners):
         mid_point = (int((corners[0][0]+corners[7][0])/2),int((corners[0][1]+corners[7][1])/2), int((corners[0][2]+corners[7][2])/2))
         return mid_point
 
-#return the distance to each corner of the frame for a given pixel coordinate
-def pixel_corner_distance(coor):
-    coor = np.array(coor)
-
-    LT = np.sqrt(np.sum(np.square(coor-np.array([0,0]))))
-    RT = np.sqrt(np.sum(np.square(coor-np.array([1024,0]))))
-    
-    LB = np.sqrt(np.sum(np.square(coor-np.array([0,1024]))))
-    RB = np.sqrt(np.sum(np.square(coor-np.array([1024,1024]))))
-
-    return LT, RT, LB, RB
-
-#check if the given pixel coordinate are the closest point to any of the corners 
-#returns a list of object ids and a list of dictionaries including the objects LT, RT, LB, RB coordinates 
-def corner_check(coor, id, segment_id_list, segment_bbox):
-    coor = np.array(coor)
-    LT, RT, LB, RB = pixel_corner_distance(coor)
-    try:
-        idx = segment_id_list.index(id)
-        if LT < segment_bbox[idx]['LT_dis']:
-            segment_bbox[idx]['LT_dis'] = LT
-            segment_bbox[idx]['LT_coor'] = coor
-        if RT < segment_bbox[idx]['RT_dis']:
-            segment_bbox[idx]['RT_dis'] = RT
-            segment_bbox[idx]['RT_coor'] = coor 
-        if LB < segment_bbox[idx]['LB_dis']:
-            segment_bbox[idx]['LB_dis'] = LB
-            segment_bbox[idx]['LB_coor'] = coor
-        if RB < segment_bbox[idx]['RB_dis']:
-            segment_bbox[idx]['RB_dis'] = RB
-            segment_bbox[idx]['RB_coor'] = coor
-
-    except:
-        segment_id_list.append(id)
-        segment_bbox.append({'LT_dis' : LT, 
-                             'LT_coor' : coor,
-                             'RT_dis' : RT, 
-                             'RT_coor' : coor,
-                             'LB_dis' : LB, 
-                             'LB_coor' : coor,
-                             'RB_dis' : RB, 
-                             'RB_coor' : coor
-                             })
-    return segment_id_list, segment_bbox
-
 #same with above but for farthest TOP, BOTTOM, LEFT, RIGHT points
 def TBLR_check(coor, id, segment_id_list, segment_bbox):
     coor = np.array(coor) #0 -> y, 1 -> x
     try:
         idx = segment_id_list.index(id)
-        if coor[0] < segment_bbox[idx]['T_coor'][0]:
-            segment_bbox[idx]['T_coor'] = coor
-        if coor[0] > segment_bbox[idx]['B_coor'][0]:
-            segment_bbox[idx]['B_coor'] = coor 
-        if coor[1] < segment_bbox[idx]['L_coor'][1]:
-            segment_bbox[idx]['L_coor'] = coor
-        if coor[1] > segment_bbox[idx]['R_coor'][1]:
-            segment_bbox[idx]['R_coor'] = coor
+        if coor[0] < segment_bbox[idx]['T_coor']:
+            segment_bbox[idx]['T_coor'] = coor[0]
+        if coor[0] > segment_bbox[idx]['B_coor']:
+            segment_bbox[idx]['B_coor'] = coor[0] 
+        if coor[1] < segment_bbox[idx]['L_coor']:
+            segment_bbox[idx]['L_coor'] = coor[1]
+        if coor[1] > segment_bbox[idx]['R_coor']:
+            segment_bbox[idx]['R_coor'] = coor[1]
 
     except:
         segment_id_list.append(id)
-        segment_bbox.append({'T_coor' : coor,
-                             'B_coor' : coor,
-                             'L_coor' : coor,
-                             'R_coor' : coor
+        segment_bbox.append({'T_coor' : coor[0],
+                             'B_coor' : coor[0],
+                             'L_coor' : coor[1],
+                             'R_coor' : coor[1]
                              })
 
     return segment_id_list, segment_bbox
 
 def TBLR_frame_check(segment, height, width):
-    if segment['T_coor'][0] < 15 or segment['B_coor'][0] > height-15 or segment['L_coor'][1] < 15 or segment['R_coor'][1] > width-15:
+    if segment['T_coor'] < 15 or segment['B_coor'] > height-15 or segment['L_coor'] < 15 or segment['R_coor'] > width-15:
         return True
     else:
         return False
 
-#finding the closest disturbance within the 1d scan and its locations and plotting it back in the occupancy grid
-def occupancy_grid_mapping(occupancy_grid):
-
-    occupancy_grid = occupancy_grid[:146, 127:] 
-
-    for horizontal in range(15,128):
-        for vertical in range(horizontal):
-            # print(occupancy_grid[147-vertical][horizontal])
-            if occupancy_grid[145-vertical][horizontal].tolist() == [0,0,0]:
-                occupancy_grid[:, horizontal] = (0, 255, 0)
-                horizontal /= 64
-                return horizontal, occupancy_grid, True
-
-    return 2, occupancy_grid, False
 
 def check_3d_bbox_inbound(object, mid_point, coor_list):
     if object['3d_bbox'][0] < mid_point[0] < object['3d_bbox'][1] and object['3d_bbox'][2] < mid_point[1] < object['3d_bbox'][3] and object['3d_bbox'][4] < mid_point[2] < object['3d_bbox'][5]:
@@ -277,3 +236,40 @@ def bbox_and_midpoint(points):
     bbox = [min_x, max_x, min_y, max_y, min_z, max_z]
 
     return bbox, mid_point
+
+def matrix_calibration(c_abs_pose, bbox_coor, depth_map, seg_map, id, K_inv, RT_inv):
+    """
+    bbox_coor = [segment['L_coor'], segment['R_coor'], segment['T_coor'], segment['B_coor']]
+    """
+
+
+    pose4 = np.append(c_abs_pose, np.array([0]))
+    pose4[2] *= 3
+    pose4 = np.reshape(pose4, (1,4))
+
+    depth_bbox = depth_map[bbox_coor[0]:bbox_coor[1],bbox_coor[2]:bbox_coor[3]]
+    seg_bbox = seg_map[bbox_coor[0]:bbox_coor[1],bbox_coor[2]:bbox_coor[3]]
+    seg_bbox = (seg_bbox==id)*1
+    pixel_bbox_x = PIXEL_REF_X[bbox_coor[0]:bbox_coor[1],bbox_coor[2]:bbox_coor[3]]
+    pixel_bbox_y = PIXEL_REF_Y[bbox_coor[0]:bbox_coor[1],bbox_coor[2]:bbox_coor[3]]
+
+    seg_mul = depth_bbox * seg_bbox
+
+    depth_temp = seg_mul[(seg_mul!=0.0)]
+    
+    pixel_x_temp = (pixel_bbox_x*seg_bbox)[(pixel_bbox_x*seg_bbox != 0.0)]*depth_temp
+    pixel_y_temp = (pixel_bbox_y*seg_bbox)[(pixel_bbox_y*seg_bbox != 0.0)]*depth_temp
+
+    pixel_full = np.array([pixel_x_temp, pixel_y_temp,depth_temp])
+
+    intrinsic = np.matmul(K_inv, pixel_full)
+
+    extrinsic = np.matmul(RT_inv, intrinsic)
+
+    extrinsic = extrinsic.T
+    
+    pose_matrix = np.repeat(pose4, len(extrinsic), axis=0)
+
+    final = extrinsic + pose_matrix
+
+    return final

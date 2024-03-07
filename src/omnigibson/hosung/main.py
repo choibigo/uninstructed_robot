@@ -12,12 +12,10 @@ import omnigibson as og
 from omnigibson.macros import gm
 from omnigibson.utils.ui_utils import KeyboardRobotController
 from omnigibson.utils.transform_utils import quat_multiply
-from omni.kit.viewport.utility import get_active_viewport
-import omni.syntheticdata as syn
 
-from mapping_utils import *
-
-np.random.seed(1234)
+from uninstructed_robot.src.omnigibson.hosung.scripts.mapping_utils import *
+from uninstructed_robot.src.omnigibson.hosung.scripts.simulation_utils import *
+from uninstructed_robot.src.omnigibson.hosung.scripts.visualization_functions import *
 
 save_root_path = r"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/image_frames/frames_240219/"
 
@@ -31,31 +29,27 @@ SCENES = dict(
     empty="Empty environment with no objects",
 )
 
-OBJECT_LABEL_GROUNDTRUTH = []
+env_name = 'Rs_int'
+env_number = 4
 
-EXCEPTION = []
+with open(f'uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_name}_{env_number}.json', 'r') as json_file:
+    OBJECT_LABEL_GROUNDTRUTH = json.load(json_file)
+with open(f'uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_name}_{env_number}_exception.json', 'r') as json_file:
+    EXCEPTION = json.load(json_file)
 
-#dictionary to keep track of all detected objects and its data
 OBJECT_DATA = {}
 
 gm.USE_GPU_DYNAMICS=False
 gm.ENABLE_FLATCACHE=False
 
-env_name = 'Rs_int_3'
-# 'Rs_int_3'
-
-#Hyper Parameters
-scan_tik = 585
+scan_tik = 10
 pix_stride = 16
-zc_lower_bound = 0.15
-zc_higher_bound = 2.5
-distinction_radius = 0.5
 
 def main():
 
     scene_cfg = dict()
 
-    object_load_folder = os.path.join(f'/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/soeun/env', f'{env_name}')
+    object_load_folder = os.path.join(f'/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/soeun/env', f'{env_name}_{env_number}')
     object_list = []
     for json_name in os.listdir(object_load_folder):
         with open(os.path.join(object_load_folder, json_name), 'r') as json_file:
@@ -80,12 +74,13 @@ def main():
         
     robot0_cfg = dict()
     robot0_cfg["type"] = 'Turtlebot' #Locobot
-    robot0_cfg["obs_modalities"] = ["rgb", "depth_linear", "seg_instance", "scan", "occupancy_grid"]
+    robot0_cfg["obs_modalities"] = ["rgb", "depth_linear", "seg_instance"]
     robot0_cfg["action_type"] = "continuous"
     robot0_cfg["action_normalize"] = True
+    # robot0_cfg["scale"] = [1,1,3]
 
     cfg = dict(scene=scene_cfg, objects=object_list, robots=[robot0_cfg])
-    env = og.Environment(configs=cfg, action_timestep=1/45., physics_timestep=1/45.)
+    env = og.Environment(configs=cfg, action_timestep=1/30., physics_timestep=1/30.)
 
     robot = env.robots[0]
     controller_choices = {'base': 'DifferentialDriveController'}
@@ -108,40 +103,59 @@ def main():
 
     c_relative_pos, c_relative_ori = env.robots[0].sensors['robot0:eyes_Camera_sensor'].get_position_orientation()
 
-    #for visualization : initializing 2d map for navigation and localization
-    map2d_pixel = np.zeros([1024, 1024,3], dtype=np.uint8)
-    map2d_pixel_result = np.zeros([1024, 1024,3], dtype=np.uint8)
+    gt_map = np.zeros([1024, 1024,3], dtype=np.uint8)
+    object_map = np.zeros([1024, 1024,3], dtype=np.uint8)
 
     K, K_inv = intrinsic_matrix(env.robots[0].sensors['robot0:eyes_Camera_sensor'], sensor_image_width, sensor_image_height)
 
-    # trigger for scanning : 'B'
-    activate_scan = False
-    count = 0
+    #Visualization Mode
+    viz_rgb = False
+    viz_depth = False
+    viz_seg = False
+    viz_seg_bbox = False
+    viz_gt_map = False
+
+    if viz_gt_map:
+        gt_map = GT_map(OBJECT_LABEL_GROUNDTRUTH, EXCEPTION, gt_map)
+        
+    # cv2.destroyWindow("shown_img")
 
     while True:
         action = action_generator.get_teleop_action()
+
+        keyboard_input = action_generator.current_keypress
+
         obs, reward, done, info = env.step(action=action)
+        agent_pos, agent_ori = env.robots[0].get_position_orientation()
+        c_abs_pose, c_abs_ori = agent_pos + c_relative_pos, quat_multiply(agent_ori, c_relative_ori)
 
-        map2d_pixel = np.zeros([1024, 1024,3], dtype=np.uint8)
+        
 
-        cam = og.sim.viewer_camera
-        cam.add_modality("bbox_3d")
-        bbox_obs = cam.get_obs()
-        nan_list = []
-        OBJECT_LABEL_GROUNDTRUTH, EXCEPTION = groundtruth_for_reference(bbox_obs['bbox_3d'], f'{env_name}')
-        for i in range(len(bbox_obs['bbox_3d'])):
-            if bbox_obs['bbox_3d'][i][0] not in EXCEPTION:
-                corners = bbox_obs['bbox_3d'][i][13]
-                if str(corners[0][0]) == 'nan' :
-                    nan_list.append(bbox_obs['bbox_3d'][i][2])
-                    continue
-                else:
-                    corners = [world_to_map(corners[0]), world_to_map(corners[3])]
-                    cv2.rectangle(map2d_pixel, corners[0], corners[1], (0, 255, 0), 1)
-        print(nan_list)
-        cv2.imshow('2D Map', map2d_pixel)
+
+
+
+
+
+
+
+
+        if viz_rgb:
+            cv2.imshow('RGB',None)
+        if viz_depth:
+            cv2.imshow('Depth',None)
+        if viz_seg:
+            cv2.imshow('Segmentation',None)
+        if viz_seg_bbox:
+            cv2.imshow('Segmentation with Bbox',None)    
+        if viz_gt_map:
+            cv2.imshow('GT-2d Map', gt_map)
+
         cv2.waitKey(1)
-        count += 1
+
+
+
+
+
     env.close()
 
 if __name__ == "__main__":
