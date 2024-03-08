@@ -95,7 +95,7 @@ def main(random_selection=False, headless=False, short_exec=False):
 
     # Loop control until user quits
     for i in range(100000):
-        env.step(np.array([]))
+        env.step(np.array([0,0]))
     # Always shut down the environment cleanly at the end
     env.close()
 
