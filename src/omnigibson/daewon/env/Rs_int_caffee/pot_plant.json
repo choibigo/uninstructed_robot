@@ -1,0 +1,14 @@
+{
+    "front_shelve":[
+        {
+            "model":"jatssq",
+            "translate":[1.46, 0.45, 0.9],
+            "orientation":[0, 0, 0, 0]
+        },
+        {
+            "model":"jatssq",
+            "translate":[1.46, -1.9, 0.9],
+            "orientation":[0, 0, 0, 0]
+        }
+    ]
+}
