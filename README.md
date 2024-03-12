@@ -1,8 +1,11 @@
 ## Uninstructed Robot
 
+## quadric slam
 
-## 일정 관리
+#### docker 
+```bash
+$ docker build -t quadricslam:1.0
+$ docker run -it --name quadricslam --privileged --gpus all --device "/dev:/dev"  quadricslam:1.0 /bin/bash
 
-#### [호성 일정](https://github.com/choibigo/uninstructed_robot/blob/main/docs/md/hosung.md)
-#### [소은 일정](https://github.com/choibigo/uninstructed_robot/blob/main/docs/md/soeun.md)
-#### [준희 일정](https://github.com/choibigo/uninstructed_robot/blob/main/docs/md/junhea.md)
+
+```
