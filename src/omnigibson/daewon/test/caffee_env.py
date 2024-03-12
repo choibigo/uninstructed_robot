@@ -67,7 +67,7 @@ if __name__ == "__main__":
     robot0_cfg["action_type"] = "continuous"
     robot0_cfg["action_normalize"] = True
 
-    visual_object_list = ["floors", "walls", "breakfast_table", "straight_chair"]
+    visual_object_list = ["floors", "walls", "breakfast_table", "straight_chair", "window", "picture", "door", "ceiling"]
     scene_cfg = {"type":"InteractiveTraversableScene","scene_model":scene_name, "load_object_categories":visual_object_list}
     # scene_cfg = {"type":"InteractiveTraversableScene","scene_model":scene_name}
     cfg = {"scene": scene_cfg,"objects":object_list, "robots":[robot0_cfg]}
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     ##### bin env
     # cfg = {"scene": {"type": "Scene"},"objects":object_list}
 
-    env = og.Environment(configs=cfg, action_timestep=1/20., physics_timestep=1/60.)
+    env = og.Environment(configs=cfg, action_timestep=1/60., physics_timestep=1/60.)
     sensor_image_width = 1024   
     sensor_image_height = 1024
     env.robots[0].sensors['robot0:eyes_Camera_sensor'].image_width = sensor_image_width 
@@ -108,6 +108,7 @@ if __name__ == "__main__":
                 # cv2.imwrite(image_save_path, cv2.cvtColor(robot.get_obs()['robot0:eyes_Camera_sensor_rgb'], cv2.COLOR_BGR2RGB))
                 step += 1
                 depth_map = obs['robot0']['robot0:eyes_Camera_sensor_depth_linear']
+                depth_map[depth_map > 5] = 0
                 depth_map = (depth_map - np.min(depth_map)) / (np.max(depth_map) - np.min(depth_map))
                 depth_map *= 255
                 depth_map = depth_map.astype(np.uint8)
@@ -116,5 +117,5 @@ if __name__ == "__main__":
                 rgb_image = cv2.cvtColor(obs['robot0']['robot0:eyes_Camera_sensor_rgb'], cv2.COLOR_BGR2RGB)
 
                 cv2.imshow("Depth", depth_map)
-                cv2.imshow("Depth", segment_id_map)
-                cv2.imshow("Depth", rgb_image)
+                cv2.imshow("seg", segment_id_map)
+                cv2.imshow("rgb", rgb_image)
