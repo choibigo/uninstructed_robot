@@ -1,5 +1,8 @@
-from Faker import faker
+from faker import Faker
+from operator import itemgetter
 
-randd = faker('ko-KR')
-data = [(randd.name(), randd.pyint(min_value=13, max_value=18) for i in range(20))]
+randd = Faker('ko-KR')
+data = [(randd.name(), randd.pyint(min_value=1300, max_value=1800)/100) for i in range(20)]
 
+answer = sorted(data, key=itemgetter(1))
+print(answer)
