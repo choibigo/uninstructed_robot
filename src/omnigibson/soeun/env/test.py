@@ -1,48 +1,37 @@
+import os
+import yaml
 import sys
 sys.path.append(r'/home/bluepot/dw_workspace/git/OmniGibson')
-sys.path.append(r'/home/starry/workspaces/dw_workspace/git/OmniGibson')
-
-from omnigibson.macros import macros as m
-from omnigibson.macros import gm
-from omnigibson.object_states import *
-from omnigibson.systems import get_system, is_physical_particle_system, is_visual_particle_system
-from omnigibson.utils.constants import PrimType
-from omnigibson.utils.physx_utils import apply_force_at_pos, apply_torque
-import omnigibson.utils.transform_utils as T
-from omnigibson.utils.usd_utils import BoundingBoxAPI
 import omnigibson as og
+from omnigibson.macros import gm
+gm.USE_GPU_DYNAMICS = True
+from omnigibson.object_states import *
+from omnigibson.systems import get_system
 
-from utils import og_test, place_obj_on_floor_plane
+# Load the config
+config_filename = os.path.join(og.example_config_path, "fetch_behavior.yaml")
+config = yaml.load(open(config_filename, "r"), Loader=yaml.FullLoader)
 
-import pytest
-import numpy as np
+config["scene"]["scene_model"] = "Beechwood_0_int"
+config["scene"]["load_task_relevant_only"] = True
+config["scene"]["not_load_object_categories"] = ["ceilings"]
+config["task"] = {
+    "type": "BehaviorTask",
+    "activity_name": "boil_water_in_the_microwave",
+    "activity_definition_id": 0,
+    "activity_instance_id": 0,
+    "predefined_problem": None,
+    "online_object_sampling": False,
+}
 
-# gm.USE_GPU_DYNAMICS = True
-# gm.ENABLE_HQ_RENDERING = True
-# gm.ENABLE_FLATCACHE = True
-# gm.FORCE_LIGHT_INTENSITY = 150000
-# scene_name = 'Rs_int'
-# scene_number = 0
+# Load the environment
+env = og.Environment(configs=config)
+scene = env.scene
+robot = env.robots[0]
 
-@og_test
-def test_filled():
-    stockpot = og.sim.scene.object_registry("name", "stockpot")
-    print('\n-----------------------------------------------\n',stockpot)
-
-    system = get_system("water")
-    
-
-    stockpot.set_position_orientation(position=np.ones(3) * 50.0, orientation=[0, 0, 0, 1.0])
-    place_obj_on_floor_plane(stockpot)
-    for _ in range(5):
-        og.sim.step()
-
-    assert stockpot.states[Filled].set_value(system, True)
-    for _ in range(5):
-        og.sim.step()
-
-
-
-while True:
-    test_filled()
-
+mug = scene.object_registry("name", "mug_188")
+system = get_system('water')
+assert mug.states[Filled].set_value(system, True)
+for _ in range(5):
+    og.sim.step()
+assert mug.states[Filled].get_value(system)
