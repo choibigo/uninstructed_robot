@@ -25,24 +25,7 @@ height = 512
 width = 512
 
 
-def intrinsic_matrix_temp(height, width):
 
-    focal_length = 24.0
-    horiz_aperture = 20.954999923706055
-    vert_aperture = height/width * horiz_aperture
-
-    focal_x = height * focal_length / vert_aperture
-    focal_y = width * focal_length / horiz_aperture
-    center_x = height * 0.5
-    center_y = width * 0.5
-
-    K = np.array([[focal_x,0, center_x, 0],
-                  [0, focal_y, center_y, 0],
-                  [0, 0, 1, 0]])
-
-    K_inv = np.linalg.pinv(K)
-
-    return K, K_inv
 
 save_root_path = f"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/test_frames/rn_int_glove_leaf_box/"
 saved_task_path = "/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/test_frames/intern_subtask_3_6/"

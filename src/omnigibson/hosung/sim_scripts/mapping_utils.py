@@ -1,15 +1,36 @@
 import numpy as np
 import json
+import cv2
 
 PIXEL_REF_X = np.load('uninstructed_robot/src/omnigibson/hosung/load_data/pixel_ref_x.npy')
 PIXEL_REF_Y = np.load('uninstructed_robot/src/omnigibson/hosung/load_data/pixel_ref_y.npy')
 
-
+MAP_HEIGHT = 824
+MAP_WIDTH = 824
 
 
 
 def test():
     print(1)
+
+def omnigibson_turtlebot_intrinsic_matrix(height, width):
+
+    focal_length = 24.0
+    horiz_aperture = 20.954999923706055
+    vert_aperture = height/width * horiz_aperture
+
+    focal_x = height * focal_length / vert_aperture
+    focal_y = width * focal_length / horiz_aperture
+    center_x = height * 0.5
+    center_y = width * 0.5
+
+    K = np.array([[focal_x,0, center_x, 0],
+                  [0, focal_y, center_y, 0],
+                  [0, 0, 1, 0]])
+
+    K_inv = np.linalg.pinv(K)
+
+    return K, K_inv
 
 #for creating groundthuth json file to be used as a reference 
 def groundtruth_for_reference(bbox_3d, env_name):
@@ -60,19 +81,19 @@ def groundtruth_for_reference(bbox_3d, env_name):
 def world_to_map(list_of_coor):
     x_coor = list_of_coor[0]
     y_coor = list_of_coor[1]
-    map_pixel_coor_x = (((y_coor / 5) * 512 ) + 511) // 1
-    map_pixel_coor_y = (((x_coor / 5) * 512 ) + 511) // 1
-    return int(map_pixel_coor_x), int(map_pixel_coor_y)
+    map_pixel_coor_x = int(y_coor * 100 + (MAP_WIDTH/2))
+    map_pixel_coor_y = int(x_coor * 100 + (MAP_HEIGHT/2))
+    return np.array([map_pixel_coor_x, map_pixel_coor_y])
 
-def world_to_map_3d(list_of_coor):
-    x_coor = list_of_coor[0]
-    y_coor = list_of_coor[1]
-    z_coor = list_of_coor[2]
-    map_pixel_coor_x = (((y_coor / 5) * 512 ) + 511) // 1
-    map_pixel_coor_y = (((x_coor / 5) * 512 ) + 511) // 1
-    map_pixel_coor_z = (((z_coor / 5) * 512 ) + 511) // 1
+# def world_to_map_3d(list_of_coor):
+#     x_coor = list_of_coor[0]
+#     y_coor = list_of_coor[1]
+#     z_coor = list_of_coor[2]
+#     map_pixel_coor_x = (((y_coor / 5) * 512 ) + 511) // 1
+#     map_pixel_coor_y = (((x_coor / 5) * 512 ) + 511) // 1
+#     map_pixel_coor_z = (((z_coor / 5) * 512 ) + 511) // 1
     
-    return int(map_pixel_coor_x), int(map_pixel_coor_y), int(map_pixel_coor_z)
+#     return int(map_pixel_coor_x), int(map_pixel_coor_y), int(map_pixel_coor_z)
 
 #return distance between two coordinates
 def two_point_distance(coor1, coor2):
@@ -134,9 +155,8 @@ def extrinsic_matrix(c_abs_ori, c_abs_pose):
     return RT, RT_inv
 
 #return intrinsic matrix and its inverse form
-def intrinsic_matrix(sensor, width, height):
-    focal_length = sensor.get_attribute('focalLength')
-    horiz_aperture = sensor.get_attribute('horizontalAperture')
+def intrinsic_matrix(focal_length, horiz_aperture, width, height):
+
     vert_aperture = height/width * horiz_aperture
 
     focal_x = height * focal_length / vert_aperture
@@ -210,7 +230,8 @@ def TBLR_check(coor, id, segment_id_list, segment_bbox):
     return segment_id_list, segment_bbox
 
 def TBLR_frame_check(segment, height, width):
-    if segment['T_coor'] < 15 or segment['B_coor'] > height-15 or segment['L_coor'] < 15 or segment['R_coor'] > width-15:
+    #segment['T_coor'] < 15 or segment['B_coor'] > height-15 or
+    if segment['L_coor'] < 15 or segment['R_coor'] > width-15:
         return True
     else:
         return False
@@ -223,7 +244,19 @@ def check_3d_bbox_inbound(object, mid_point, coor_list):
         return True
     else:
         return False
-    
+
+def bbox_midpoint_determine(bbox, bbox2):
+    bbox_final = []
+    bbox_final.append(np.min(np.array([bbox[0], bbox2[0]])))
+    bbox_final.append(np.max(np.array([bbox[1], bbox2[1]])))
+    bbox_final.append(np.min(np.array([bbox[2], bbox2[2]])))
+    bbox_final.append(np.max(np.array([bbox[3], bbox2[3]])))
+    bbox_final.append(np.min(np.array([bbox[4], bbox2[4]])))
+    bbox_final.append(np.max(np.array([bbox[5], bbox2[5]])))
+
+    mid_point_final = [(bbox_final[0]+bbox_final[1])/2, (bbox_final[2]+bbox_final[3])/2, (bbox_final[4]+bbox_final[5])/2]
+    return bbox_final, mid_point_final
+
 def bbox_and_midpoint(points):
     max_x = np.max(points[:,0])
     min_x = np.min(points[:,0])
@@ -237,28 +270,39 @@ def bbox_and_midpoint(points):
 
     return bbox, mid_point
 
-def matrix_calibration(c_abs_pose, bbox_coor, depth_map, seg_map, id, K_inv, RT_inv):
+def matrix_calibration(c_abs_pose, bbox_coor, depth_map, seg_map, id, K_inv, RT_inv, scan_radius):
     """
     bbox_coor = [segment['L_coor'], segment['R_coor'], segment['T_coor'], segment['B_coor']]
     """
-
+    # bbox_coor = np.array(bbox_coor)*512
+    # bbox_coor = np.array(bbox_coor, dtype=int)
+    depth_limit = scan_radius / 100
 
     pose4 = np.append(c_abs_pose, np.array([0]))
     pose4[2] *= 3
     pose4 = np.reshape(pose4, (1,4))
 
     depth_bbox = depth_map[bbox_coor[0]:bbox_coor[1],bbox_coor[2]:bbox_coor[3]]
+
     seg_bbox = seg_map[bbox_coor[0]:bbox_coor[1],bbox_coor[2]:bbox_coor[3]]
     seg_bbox = (seg_bbox==id)*1
+    bbox_sum = np.sum(seg_bbox)
     pixel_bbox_x = PIXEL_REF_X[bbox_coor[0]:bbox_coor[1],bbox_coor[2]:bbox_coor[3]]
     pixel_bbox_y = PIXEL_REF_Y[bbox_coor[0]:bbox_coor[1],bbox_coor[2]:bbox_coor[3]]
-
+    # print('seg box : ', seg_bbox.shape)
     seg_mul = depth_bbox * seg_bbox
-
+    # print('seg_mul : ', seg_mul.shape)
     depth_temp = seg_mul[(seg_mul!=0.0)]
+    # print('depth temp : ', depth_temp.shape)
+
+    if str(np.mean(depth_bbox)) == 'nan' or bbox_sum == 0 or (np.sum(depth_bbox)/bbox_sum) > depth_limit : 
+        return False, np.empty((0))
     
-    pixel_x_temp = (pixel_bbox_x*seg_bbox)[(pixel_bbox_x*seg_bbox != 0.0)]*depth_temp
-    pixel_y_temp = (pixel_bbox_y*seg_bbox)[(pixel_bbox_y*seg_bbox != 0.0)]*depth_temp
+    # print((pixel_bbox_x*seg_bbox != 0.0).shape)
+    # print((pixel_bbox_x*seg_bbox)[(pixel_bbox_x*seg_bbox != 0.0)].shape)
+    pixel_x_temp = (pixel_bbox_x*seg_bbox)[(seg_mul!=0.0)]*depth_temp
+    # print('pixel bbox : ', pixel_bbox_x.shape)
+    pixel_y_temp = (pixel_bbox_y*seg_bbox)[(seg_mul!=0.0)]*depth_temp
 
     pixel_full = np.array([pixel_x_temp, pixel_y_temp,depth_temp])
 
@@ -271,5 +315,66 @@ def matrix_calibration(c_abs_pose, bbox_coor, depth_map, seg_map, id, K_inv, RT_
     pose_matrix = np.repeat(pose4, len(extrinsic), axis=0)
 
     final = extrinsic + pose_matrix
+
+    if final.shape[0] == 0:
+        return False, final
+    else:
+        return True, final
+
+def matrix_calibration_print(c_abs_pose, bbox_coor, depth_map, seg_map, id, K_inv, RT_inv):
+    """
+    bbox_coor = [segment['L_coor'], segment['R_coor'], segment['T_coor'], segment['B_coor']]
+    """
+    # bbox_coor = np.array(bbox_coor)*512
+    # bbox_coor = np.array(bbox_coor, dtype=int)
+    # print(bbox_coor)
+    pose4 = np.append(c_abs_pose, np.array([0]))
+    pose4[2] *= 3
+    pose4 = np.reshape(pose4, (1,4))
+
+    depth_bbox = depth_map[bbox_coor[0]:bbox_coor[1],bbox_coor[2]:bbox_coor[3]]
+    print('depth_bbox : ', depth_bbox.shape)
+
+    seg_bbox = seg_map[bbox_coor[0]:bbox_coor[1],bbox_coor[2]:bbox_coor[3]]
+    print(seg_bbox.shape)
+    # cv2.imshow('temp', seg_bbox)
+    # cv2.waitKey(0)
+    
+    values, counts = np.unique(seg_bbox, return_counts=True)
+    print(values)
+
+    seg_bbox = (seg_bbox==id)*1
+    print(np.sum(seg_bbox))
+
+    pixel_bbox_x = PIXEL_REF_X[bbox_coor[0]:bbox_coor[1],bbox_coor[2]:bbox_coor[3]]
+    pixel_bbox_y = PIXEL_REF_Y[bbox_coor[0]:bbox_coor[1],bbox_coor[2]:bbox_coor[3]]
+
+    seg_mul = depth_bbox * seg_bbox
+    print(seg_mul.shape)
+
+    depth_temp = seg_mul[(seg_mul!=0.0)]
+    print(depth_temp.shape)
+
+    pixel_x_temp = (pixel_bbox_x*seg_bbox)[(pixel_bbox_x*seg_bbox != 0.0)]*depth_temp
+    pixel_y_temp = (pixel_bbox_y*seg_bbox)[(pixel_bbox_y*seg_bbox != 0.0)]*depth_temp
+    print(pixel_bbox_x.shape)
+
+
+    pixel_full = np.array([pixel_x_temp, pixel_y_temp,depth_temp])
+    print(pixel_full.shape)
+
+    intrinsic = np.matmul(K_inv, pixel_full)
+    print(intrinsic.shape)
+
+    extrinsic = np.matmul(RT_inv, intrinsic)
+    print(extrinsic.shape)
+
+    extrinsic = extrinsic.T
+    print(extrinsic.shape)
+
+    pose_matrix = np.repeat(pose4, len(extrinsic), axis=0)
+
+    final = extrinsic + pose_matrix
+    print(final.shape)
 
     return final

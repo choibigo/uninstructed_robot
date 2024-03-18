@@ -9,6 +9,7 @@ import numpy as np
 import cv2
 import json
 import omnigibson as og
+import paramiko
 
 from omnigibson.macros import gm
 from omnigibson.utils.ui_utils import KeyboardRobotController
@@ -20,9 +21,12 @@ from sim_scripts.simulation_utils import *
 env_name = 'Rs_int'
 env_number = 4
 
-save_root_path = f"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/saved_frames/{env_name}_{env_number}_24_{datetime.today().month}_{datetime.today().day}/"
+sim_ver = f'{env_name}_{env_number}_24_{datetime.today().month}_{datetime.today().day}_v3'
+save_root_path = f"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/saved_frames/{sim_ver}"
 os.makedirs(save_root_path, exist_ok=True)
+server_data_path = f'/home/cbigo/workspace/data/{env_name}_{env_number}/{sim_ver}'
 
+gm.FORCE_LIGHT_INTENSITY = 300000
 gm.USE_GPU_DYNAMICS=False
 gm.ENABLE_FLATCACHE=False
 
@@ -41,7 +45,7 @@ def save_info(count, robot_obs, c_abs_pose, c_abs_ori):
     depth_path = os.path.join(extra_info, 'depth')
     seg_path = os.path.join(extra_info, 'seg')
     pose_ori_path = os.path.join(extra_info, 'pose_ori')
-    
+
     cv2.imwrite(image_path, cv2.cvtColor(robot_obs['robot0:eyes_Camera_sensor_rgb'], cv2.COLOR_BGR2RGB))
     cv2.imwrite(debugging_image_path, cv2.cvtColor(robot_obs['robot0:eyes_Camera_sensor_rgb'], cv2.COLOR_BGR2RGB))
     np.save(depth_path, robot_obs['robot0:eyes_Camera_sensor_depth_linear'])
@@ -49,7 +53,6 @@ def save_info(count, robot_obs, c_abs_pose, c_abs_ori):
     np.save(pose_ori_path, np.array([c_abs_pose, c_abs_ori], dtype=object))
 
 def main():
-
     scene_cfg = dict()
 
     object_load_folder = os.path.join(f'/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/soeun/env', f'{env_name}_{env_number}')
@@ -83,7 +86,7 @@ def main():
     # robot0_cfg["scale"] = [1,1,3]
 
     cfg = dict(scene=scene_cfg, objects=object_list, robots=[robot0_cfg])
-    env = og.Environment(configs=cfg, action_timestep=1/30., physics_timestep=1/30.)
+    env = og.Environment(configs=cfg, action_timestep=1/30., physics_timestep=1/45.)
 
     robot = env.robots[0]
     controller_choices = {'base': 'DifferentialDriveController'}

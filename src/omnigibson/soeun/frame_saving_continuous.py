@@ -1,6 +1,7 @@
 import os
 import sys
 sys.path.append(r'/home/starry/workspaces/dw_workspace/git/OmniGibson')
+sys.path.append(r'/home/bluepot/dw_workspace/git/OmniGibson')
 
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
@@ -16,7 +17,7 @@ from omnigibson.utils.transform_utils import quat_multiply
 
 gm.FORCE_LIGHT_INTENSITY = 200000
 
-save_root_path = f"/home/starry/workspaces/dw_workspace/git/uninstructed_robot/src/omnigibson/soeun/image_frames/frames_24-{datetime.today().month}-{datetime.today().day}/"
+save_root_path = f"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/soeun/image_frames/frames_24-{datetime.today().month}-{datetime.today().day}/"
 os.makedirs(save_root_path, exist_ok=True)
 
 
@@ -32,7 +33,7 @@ def main():
 
     scene_cfg = dict()
 
-    object_load_folder = os.path.join(f'/home/starry/workspaces/dw_workspace/git/uninstructed_robot/src/omnigibson/soeun/env', f'{env_name}_{env_number}')
+    object_load_folder = os.path.join(f'/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/soeun/env', f'{env_name}_{env_number}')
     object_list = []
     for json_name in os.listdir(object_load_folder):
         with open(os.path.join(object_load_folder, json_name), 'r') as json_file:

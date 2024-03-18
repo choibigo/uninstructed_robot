@@ -35,3 +35,9 @@ assert mug.states[Filled].set_value(system, True)
 for _ in range(5):
     og.sim.step()
 assert mug.states[Filled].get_value(system)
+
+
+# https://discord.com/channels/1166422812160966707/1182552345557618688/1196932524409110538
+# https://github.com/StanfordVL/OmniGibson/issues/546
+# https://github.com/StanfordVL/OmniGibson/blob/main/omnigibson/configs/fetch_behavior.yaml
+# https://github.com/StanfordVL/OmniGibson/blob/main/omnigibson/examples/scenes/scene_selector.py

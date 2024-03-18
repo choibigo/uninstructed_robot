@@ -13,9 +13,13 @@ from omnigibson.macros import gm
 from omnigibson.utils.ui_utils import KeyboardRobotController
 from omnigibson.utils.transform_utils import quat_multiply
 
-from uninstructed_robot.src.omnigibson.hosung.scripts.mapping_utils import *
-from uninstructed_robot.src.omnigibson.hosung.scripts.simulation_utils import *
-from uninstructed_robot.src.omnigibson.hosung.scripts.visualization_functions import *
+from sim_scripts.mapping_utils import *
+from sim_scripts.visualization_functions import *
+
+import matplotlib.pyplot as plt
+import random
+
+random.seed(123)
 
 save_root_path = r"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/image_frames/frames_240219/"
 
@@ -37,15 +41,23 @@ with open(f'uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_name}_{env_num
 with open(f'uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_name}_{env_number}_exception.json', 'r') as json_file:
     EXCEPTION = json.load(json_file)
 
-OBJECT_DATA = {}
+PIXEL_REF_X = np.load('uninstructed_robot/src/omnigibson/hosung/load_data/pixel_ref_x.npy')
+PIXEL_REF_Y = np.load('uninstructed_robot/src/omnigibson/hosung/load_data/pixel_ref_y.npy')
 
 gm.USE_GPU_DYNAMICS=False
 gm.ENABLE_FLATCACHE=False
 
-scan_tik = 10
+#Hyper Parameters
+#585
+scan_tik = 50
 pix_stride = 16
+zc_lower_bound = 0.15
+zc_higher_bound = 2.5
+distinction_radius = 0.5
 
 def main():
+
+    object_data = {}
 
     scene_cfg = dict()
 
@@ -74,13 +86,12 @@ def main():
         
     robot0_cfg = dict()
     robot0_cfg["type"] = 'Turtlebot' #Locobot
-    robot0_cfg["obs_modalities"] = ["rgb", "depth_linear", "seg_instance"]
+    robot0_cfg["obs_modalities"] = ["rgb", "depth_linear", "seg_instance", "scan", "occupancy_grid"]
     robot0_cfg["action_type"] = "continuous"
     robot0_cfg["action_normalize"] = True
-    # robot0_cfg["scale"] = [1,1,3]
 
     cfg = dict(scene=scene_cfg, objects=object_list, robots=[robot0_cfg])
-    env = og.Environment(configs=cfg, action_timestep=1/30., physics_timestep=1/30.)
+    env = og.Environment(configs=cfg, action_timestep=1/45., physics_timestep=1/45.)
 
     robot = env.robots[0]
     controller_choices = {'base': 'DifferentialDriveController'}
@@ -103,58 +114,91 @@ def main():
 
     c_relative_pos, c_relative_ori = env.robots[0].sensors['robot0:eyes_Camera_sensor'].get_position_orientation()
 
+    #for visualization : initializing 2d map for navigation and localization
     gt_map = np.zeros([1024, 1024,3], dtype=np.uint8)
     object_map = np.zeros([1024, 1024,3], dtype=np.uint8)
 
     K, K_inv = intrinsic_matrix(env.robots[0].sensors['robot0:eyes_Camera_sensor'], sensor_image_width, sensor_image_height)
 
-    #Visualization Mode
-    viz_rgb = False
-    viz_depth = False
-    viz_seg = False
-    viz_seg_bbox = False
-    viz_gt_map = False
+    # trigger for scanning : 'B'
+    activate_scan = False
+    count = 0
 
-    if viz_gt_map:
-        gt_map = GT_map(OBJECT_LABEL_GROUNDTRUTH, EXCEPTION, gt_map)
-        
-    # cv2.destroyWindow("shown_img")
+   
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
 
     while True:
-        action = action_generator.get_teleop_action()
+    
+        #control robot via keyboard input
+        if not activate_scan:
+            action = action_generator.get_teleop_action()
 
+        #active scanning
+        else:
+            count+=1
+            #right turn with slower angular velocity
+            action = [0.0, -0.1]
+            if count == scan_tik:
+                count = 0
+                activate_scan = False
+                    
         keyboard_input = action_generator.current_keypress
 
+        #B : activate scan mode
+        if str(keyboard_input) == 'KeyboardInput.B':
+            activate_scan = True
+
+        if str(keyboard_input) == 'KeyboardInput.N':
+            object_map = np.copy(gt_map)
+            object_map = object_data_plot(object_map, object_data, task=False)
+
         obs, reward, done, info = env.step(action=action)
+        
         agent_pos, agent_ori = env.robots[0].get_position_orientation()
+        
         c_abs_pose, c_abs_ori = agent_pos + c_relative_pos, quat_multiply(agent_ori, c_relative_ori)
 
+        depth_map = obs['robot0']['robot0:eyes_Camera_sensor_depth_linear']
+        segment_id_map = np.array(obs['robot0']['robot0:eyes_Camera_sensor_seg_instance'], dtype=np.uint8)
+        segment_id_map2 = cv2.cvtColor(np.array(obs['robot0']['robot0:eyes_Camera_sensor_seg_instance']*2.55, dtype=np.uint8), cv2.COLOR_GRAY2RGB)
         
+        if activate_scan :
+            segment_id_list = []
+            segment_bbox = []
 
+            _, RT_inv = extrinsic_matrix(c_abs_ori, c_abs_pose)
 
+            #check segment data upon each point to find the 2d bounding box
+            for x in range(0, sensor_image_width, pix_stride):
+                for y in range(0, sensor_image_height, pix_stride):
+                    if segment_id_map[y,x] not in EXCEPTION:
+                        #finding farthest top, bottom, left, right points
+                        segment_id_list, segment_bbox = TBLR_check([x,y],segment_id_map[y,x],segment_id_list, segment_bbox)
 
+            for idx, segment in enumerate(segment_bbox):
+                #rejecting objects uncaptured as a whole within the frame
+                if TBLR_frame_check(segment, sensor_image_height, sensor_image_width):
+                    continue
+                else:
+                    if segment['R_coor']-segment['L_coor'] == 0 or segment['B_coor']-segment['T_coor'] == 0:
+                        continue
+                    else:
+                        bbox_coor = [segment['L_coor'],segment['R_coor'],segment['T_coor'],segment['B_coor']]
+                        id = segment_id_list[idx]
+                        cv2.rectangle(segment_id_map2, (segment['T_coor'],segment['R_coor']), (segment['B_coor'],segment['L_coor']), (0, 255, 0), 2)
+                        
+                        final = matrix_calibration(c_abs_pose, bbox_coor, depth_map, segment_id_map, id, K_inv, RT_inv)
 
+                        label = OBJECT_LABEL_GROUNDTRUTH[f'{id}']['label']
 
+                        object_data = object_data_dictionary(object_data, label, OBJECT_LABEL_GROUNDTRUTH, final, id)
 
-
-
-
-        if viz_rgb:
-            cv2.imshow('RGB',None)
-        if viz_depth:
-            cv2.imshow('Depth',None)
-        if viz_seg:
-            cv2.imshow('Segmentation',None)
-        if viz_seg_bbox:
-            cv2.imshow('Segmentation with Bbox',None)    
-        if viz_gt_map:
-            cv2.imshow('GT-2d Map', gt_map)
+                
+        cv2.imshow('segmentation with bbox', segment_id_map2)     
+        cv2.imshow('2D Map', object_map)
 
         cv2.waitKey(1)
-
-
-
-
 
     env.close()
 

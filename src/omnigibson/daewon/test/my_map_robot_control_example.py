@@ -5,7 +5,7 @@ Options for random actions, as well as selection of robot action space
 """
 import os
 import sys
-sys.path.append(r'D:\workspace\Difficult\git\OmniGibson')
+sys.path.append(r'/home/bluepot/dw_workspace/git/OmniGibson')
 
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
@@ -178,6 +178,10 @@ def main(random_selection=False, headless=False, short_exec=False):
     focal_y = sensor_image_width * focal_length / horiz_aperture
     center_x = sensor_image_height * 0.5
     center_y = sensor_image_width * 0.5
+
+    print("##########################")
+    print(focal_x, focal_y)
+    exit()
 
     # Loop control until user quits
     max_steps = -1 if not short_exec else 100

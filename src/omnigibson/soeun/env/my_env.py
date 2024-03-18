@@ -2,7 +2,9 @@ import sys
 from PIL import Image
 
 import cv2
-sys.path.append(r'/home/starry/workspaces/dw_workspace/git/OmniGibson')
+sys.path.append(r'/home/bluepot/dw_workspace/git/OmniGibson')
+
+# sys.path.append(r'/home/starry/workspaces/dw_workspace/git/OmniGibson')
 
 import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
@@ -19,11 +21,12 @@ gm.USE_GPU_DYNAMICS = False
 gm.ENABLE_FLATCACHE = True
 
 scene_name = 'Rs_int'
-scene_number = 3
+scene_number = 4
 
 if __name__ == "__main__":
     # object config
-    object_load_folder = os.path.join('/home/starry/workspaces/dw_workspace/git/uninstructed_robot/src/omnigibson/soeun/env', f'{scene_name}_{scene_number}')
+    # object_load_folder = os.path.join('/home/starry/workspaces/dw_workspace/git/uninstructed_robot/src/omnigibson/soeun/env', f'{scene_name}_{scene_number}')
+    object_load_folder = os.path.join(os.path.split(__file__)[0], f'{scene_name}_{scene_number}')
     object_list = []
     for json_name in os.listdir(object_load_folder):
         with open(os.path.join(object_load_folder, json_name), 'r') as json_file:

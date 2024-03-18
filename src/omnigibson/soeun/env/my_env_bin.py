@@ -1,6 +1,6 @@
 import sys
-# sys.path.append(r'/home/bluepot/dw_workspace/git/OmniGibson')
-sys.path.append(r'/home/starry/workspaces/dw_workspace/git/OmniGibson')
+sys.path.append(r'/home/bluepot/dw_workspace/git/OmniGibson')
+# sys.path.append(r'/home/starry/workspaces/dw_workspace/git/OmniGibson')
 import os
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 

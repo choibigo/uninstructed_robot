@@ -1,0 +1,9 @@
+{
+    "front_shelve":[
+        {
+            "model":"nloqia",
+            "translate":[1.05, -3.32, 0.15],
+            "orientation":[-0.81816, -0.34385, 0.28443, -0.3626]
+        }
+    ]
+}
