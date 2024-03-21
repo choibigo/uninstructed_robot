@@ -8,6 +8,7 @@ import numpy as np
 import cv2
 import json
 import omnigibson as og
+import pickle
 
 from omnigibson.macros import gm
 from omnigibson.utils.ui_utils import KeyboardRobotController
@@ -47,18 +48,6 @@ scan_radius = 250
 
 #dictionary of nodes and its information
 map_node = {}
-
-class NumpyEncoder(json.JSONEncoder):
-    """ Special json encoder for numpy types """
-    def default(self, obj):
-        if isinstance(obj, np.integer):
-            return int(obj)
-        elif isinstance(obj, np.floating):
-            return float(obj)
-        elif isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
-
 
 def main():
     #TODO set the env_name to match the gt map / add code to create gt map : GT_map()
@@ -266,25 +255,12 @@ def main():
         #     cv2.imshow(f'NODE {i+1}', map_node[f'{i+1}']['detection_map'])
         cv2.waitKey(1)
         if str(keypress) == 'KeyboardInput.B':
-            # print(map_node)
-            # for key in map_node:
-            #     for label in len(map_node[f'{key}']['detection_result']):
-            #         for i in len(map_node[f'{key}']['detection_result'][f'{label}']['instance']):
-            #             map_node[f'{key}']['detection_result'][f'{label}']['instance'][i]['3d_points'] = []
-            # for key in object_data:
-            #     for i in len(map_node[f'{key}']['instance']):
-            #         object_data[f'{key}']['instance'][i]['3d_points'] = []
-
-            map_node_encode = json.dumps(map_node, cls=NumpyEncoder)
-            object_data_encode = json.dumps(object_data, cls=NumpyEncoder)
             
-            with open('/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/GT_dict/node_map_objects.json', 'w', encoding='utf-8') as f:
-                json.dump(map_node_encode, f, indent=4, ensure_ascii=False)
-            with open('/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/GT_dict/map_objects.json', 'w', encoding='utf-8') as f:
-                json.dump(object_data_encode, f, indent=4, ensure_ascii=False)
-        # except:
-        #     continue
+            with open('/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/GT_dict/node_map_objects.pickle', mode = 'wb') as f:
+                pickle.dump(map_node, f)
 
+            with open('/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/GT_dict/map_objects.pickle', mode = 'wb') as f:
+                pickle.dump(object_data, f)
 
 
     env.close()

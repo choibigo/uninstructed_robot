@@ -7,14 +7,17 @@ import paramiko
 from sim_scripts.mapping_utils import *
 from datetime import datetime
 
-env_name = 'Rs_int'
-env_number = 4
-#24_{datetime.today().month}_{datetime.today().day}
-sim_ver = f'{env_name}_{env_number}_24_{datetime.today().month}_{datetime.today().day}_v3'
+env_name = 'Rs_int_custom'
+env_version = None
 
-with open(f'uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_name}_{env_number}.json', 'r') as json_file:
+env_full = (env_name+'_'+env_version) if env_version != None else env_name
+
+#24_{datetime.today().month}_{datetime.today().day}
+sim_ver = f'{env_full}_24_{datetime.today().month}_{datetime.today().day}'
+
+with open(f'uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_full}.json', 'r') as json_file:
     OBJECT_LABEL_GROUNDTRUTH = json.load(json_file)
-with open(f'uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_name}_{env_number}_exception.json', 'r') as json_file:
+with open(f'uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_full}_exception.json', 'r') as json_file:
     EXCEPTION = json.load(json_file)
 
 OBJECT_DATA = {}
@@ -46,8 +49,8 @@ def intrinsic_matrix_temp(height, width):
 
     return K, K_inv
 
-save_root_path = f"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/saved_frames/{sim_ver}"
-server_data_path = f'/home/cbigo/workspace/data/{env_name}_{env_number}/{sim_ver}'
+save_root_path = f"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/saved_frames/{sim_ver}_robot"
+server_data_path = f'/home/cbigo/workspace/data/{env_full}/{sim_ver}_robot'
 
 total_frame_count = len(os.listdir(f'{save_root_path}/extra_info'))
 
@@ -155,63 +158,63 @@ def main():
         segment_bbox = []
         objects_in_frame = {}
 
-        for x in range(0, sensor_height, pixel_stride):
-            for y in range(0, sensor_height, pixel_stride):
-                if seg_npy[y,x] not in EXCEPTION:
-                    segment_id_list, segment_bbox = TBLR_check([x,y],seg_npy[y,x], segment_id_list, segment_bbox)
+        # for x in range(0, sensor_height, pixel_stride):
+        #     for y in range(0, sensor_height, pixel_stride):
+        #         if seg_npy[y,x] not in EXCEPTION:
+        #             segment_id_list, segment_bbox = TBLR_check([x,y],seg_npy[y,x], segment_id_list, segment_bbox)
 
-        for idx, segment in enumerate(segment_bbox):
-            #rejecting objects uncaptured as a whole within the frame
-            if TBLR_frame_check(segment, sensor_height, sensor_width):
-                continue
-            else:
-                depth_bbox = depth_npy[segment['L_coor']:segment['R_coor'], segment['T_coor']:segment['B_coor']]
-                seg_bbox = seg_npy[segment['L_coor']:segment['R_coor'], segment['T_coor']:segment['B_coor']]
-                seg_bbox_sum = np.sum((seg_bbox == segment_id_list[idx])*1)
-                depth_bbox = depth_bbox*((seg_bbox == segment_id_list[idx])*1)
-                # print(np.mean(de))
-                # print(np.sum(depth_bbox))
-                # print(seg_bbox_sum)
-                if str(np.mean(depth_bbox)) == 'nan' or (np.sum(depth_bbox)/seg_bbox_sum) > depth_limit :
-                    continue
-                else:
-                    cv2.rectangle(rgb_image, (segment['T_coor'],segment['L_coor']), (segment['B_coor'],segment['R_coor']), (255,255,255), 1)
-                    label = OBJECT_LABEL_GROUNDTRUTH[f'{segment_id_list[idx]}']['label']
-                    cv2.putText(rgb_image, f'{label} : {np.sum(depth_bbox)/seg_bbox_sum}', 
-                                (segment['T_coor'],segment['L_coor']), 
-                                cv2.FONT_HERSHEY_SIMPLEX, 
-                                0.5,
-                                (255,255,255),
-                                1,
-                                cv2.LINE_AA)
+        # for idx, segment in enumerate(segment_bbox):
+        #     #rejecting objects uncaptured as a whole within the frame
+        #     if TBLR_frame_check(segment, sensor_height, sensor_width):
+        #         continue
+        #     else:
+        #         depth_bbox = depth_npy[segment['L_coor']:segment['R_coor'], segment['T_coor']:segment['B_coor']]
+        #         seg_bbox = seg_npy[segment['L_coor']:segment['R_coor'], segment['T_coor']:segment['B_coor']]
+        #         seg_bbox_sum = np.sum((seg_bbox == segment_id_list[idx])*1)
+        #         depth_bbox = depth_bbox*((seg_bbox == segment_id_list[idx])*1)
+        #         # print(np.mean(de))
+        #         # print(np.sum(depth_bbox))
+        #         # print(seg_bbox_sum)
+        #         if str(np.mean(depth_bbox)) == 'nan' or (np.sum(depth_bbox)/seg_bbox_sum) > depth_limit :
+        #             continue
+        #         else:
+        #             cv2.rectangle(rgb_image, (segment['T_coor'],segment['L_coor']), (segment['B_coor'],segment['R_coor']), (255,255,255), 1)
+        #             label = OBJECT_LABEL_GROUNDTRUTH[f'{segment_id_list[idx]}']['label']
+        #             cv2.putText(rgb_image, f'{label} : {np.sum(depth_bbox)/seg_bbox_sum}', 
+        #                         (segment['T_coor'],segment['L_coor']), 
+        #                         cv2.FONT_HERSHEY_SIMPLEX, 
+        #                         0.5,
+        #                         (255,255,255),
+        #                         1,
+        #                         cv2.LINE_AA)
                     
-                    LT_x = segment['T_coor']/sensor_height
-                    LT_y = segment['L_coor']/sensor_width
-                    RB_x = segment['B_coor']/sensor_height
-                    RB_y = segment['R_coor']/sensor_width
+        #             LT_x = segment['T_coor']/sensor_height
+        #             LT_y = segment['L_coor']/sensor_width
+        #             RB_x = segment['B_coor']/sensor_height
+        #             RB_y = segment['R_coor']/sensor_width
                     
-                    bbox = {'LT_X' : LT_x,
-                            'LT_Y' : LT_y,
-                            'RB_X' : RB_x,
-                            'RB_Y' : RB_y
-                            }
-                    objects_in_frame[f'{label}-[{LT_x}, {LT_y}, {RB_x}, {RB_y}]'] = {
-                        'label': label,
-                        'bbox' : bbox,
-                        'id' : int(segment_id_list[idx])
-                        }
+        #             bbox = {'LT_X' : LT_x,
+        #                     'LT_Y' : LT_y,
+        #                     'RB_X' : RB_x,
+        #                     'RB_Y' : RB_y
+        #                     }
+        #             objects_in_frame[f'{label}-[{LT_x}, {LT_y}, {RB_x}, {RB_y}]'] = {
+        #                 'label': label,
+        #                 'bbox' : bbox,
+        #                 'id' : int(segment_id_list[idx])
+        #                 }
                     
         save_info(frame_num, sftp)
 
-        cv2.imwrite(f'{bbox_debugging_path}/{formatted_count}.png', rgb_image)
-        sftp.put(f'{bbox_debugging_path}/{formatted_count}.png', f'{server_data_path}/debugging/bbox_image/{formatted_count}.png')
+        # cv2.imwrite(f'{bbox_debugging_path}/{formatted_count}.png', rgb_image)
+        # sftp.put(f'{bbox_debugging_path}/{formatted_count}.png', f'{server_data_path}/debugging/bbox_image/{formatted_count}.png')
 
-        with open(f'{extra_info_path}/object_info.json', 'w', encoding='utf-8') as f:
-            json.dump(objects_in_frame, f, indent='\t', ensure_ascii=False)
-        sftp.put(f'{extra_info_path}/object_info.json', f'{server_data_path}/extra_info/{formatted_count}/object_info.json')
+        # with open(f'{extra_info_path}/object_info.json', 'w', encoding='utf-8') as f:
+        #     json.dump(objects_in_frame, f, indent='\t', ensure_ascii=False)
+        # sftp.put(f'{extra_info_path}/object_info.json', f'{server_data_path}/extra_info/{formatted_count}/object_info.json')
 
-    last_frame = np.array([total_frame_count])
-    np.save(f'{save_root_path}/debugging/frame_count', last_frame)    
+    # last_frame = np.array([total_frame_count])
+    # np.save(f'{save_root_path}/debugging/frame_count', last_frame)    
 
 if __name__ == "__main__":
     main()
