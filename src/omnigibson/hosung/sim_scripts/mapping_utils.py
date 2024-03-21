@@ -9,7 +9,6 @@ MAP_HEIGHT = 824
 MAP_WIDTH = 824
 
 
-
 def test():
     print(1)
 
