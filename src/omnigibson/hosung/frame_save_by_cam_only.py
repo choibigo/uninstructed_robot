@@ -9,13 +9,11 @@ import cv2
 import json
 import omnigibson as og
 from datetime import datetime
-import time
 import random
 
 from omnigibson.macros import gm
 from omnigibson.utils.ui_utils import KeyboardRobotController
 from omnigibson.utils.transform_utils import quat_multiply
-import omnigibson.utils.transform_utils as T
 
 from sim_scripts.mapping_utils import *
 from sim_scripts.simulation_utils import *
@@ -54,20 +52,18 @@ SCAN_RADIUS = 250
 node_radius = 100
 ############### ang_vel : 0.323
 
-sim_ver = f'{env_full}_24_{datetime.today().month}_{datetime.today().day}'
-save_root_path = f"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/saved_frames/{sim_ver}_robot"
+sim_ver = 'test_rs_int_cam_only2'
+save_root_path = f"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/saved_frames/{sim_ver}"
 os.makedirs(save_root_path, exist_ok=True)
-save_root_path2 = f"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/saved_frames/{sim_ver}_camera"
-os.makedirs(save_root_path2, exist_ok=True)
 
 def save_info_cam(count, cam, c_abs_pose, c_abs_ori):
     formatted_count = "{:08}".format(count)
     cam_obs = cam.get_obs()
 
-    extra_info = os.path.join(save_root_path2, 'extra_info', formatted_count)
+    extra_info = os.path.join(save_root_path, 'extra_info', formatted_count)
     os.makedirs(extra_info, exist_ok=True)
 
-    debugging = os.path.join(save_root_path2, 'debugging', 'original_image')
+    debugging = os.path.join(save_root_path, 'debugging', 'original_image')
     os.makedirs(debugging, exist_ok=True)
 
     image_path = os.path.join(extra_info, 'original_image.png')
@@ -109,11 +105,9 @@ def save_info_robot(count, robot_obs, c_abs_pose, c_abs_ori):
 def main():
     map_node = {}
 
-    gt_map = cv2.imread('/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/gt_map_all_env/rsint.png')
-    gt_map = cv2.flip(gt_map, 1)
-    gt_map = cv2.rotate(gt_map, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
-    env, action_generator = environment_initialize_empty(env_name, env_full)
+
+    env, action_generator = environment_initialize(env_name, env_full)
 
     cam = og.sim.viewer_camera
     cam.set_position_orientation(
@@ -133,48 +127,38 @@ def main():
     cam.add_modality('seg_instance')
 
     c_relative_pos, c_relative_ori = env.robots[0].sensors['robot0:eyes_Camera_sensor'].get_position_orientation()
-    c_relative_ori = [-0.455, 0.455, 0.542, -0.542]
+    c_relative_ori_viewport = [-0.455, 0.455, 0.542, -0.542]
 
-    count = 0
+    save_count = 0
     rotate_count = 0
     rotate = False
+    count = 0
     while True:
 
-        action = action_generator.get_teleop_action()
-        keyboard_input = action_generator.current_keypress
-        time.sleep(0.1)
-
-        obs, _, _, _ = env.step(action=action)
-
-        agent_pos, agent_ori = env.robots[0].get_position_orientation()
-
-        c_abs_pose, c_abs_ori = agent_pos + c_relative_pos, quat_multiply(agent_ori, c_relative_ori)
-
-        cam_pose = c_abs_pose
-        cam_pose[2] *= 2.5
-
-        if count == 0:
-            pos = cam_pose
-            ori = c_abs_ori
-
-        if str(keyboard_input) == 'KeyboardInput.B': 
-            angle = int(input('angle : '))
-            angle = np.deg2rad(angle)
-            cam.set_local_pose(orientation=T.euler2quat([np.deg2rad(75), 0, angle]))
-            pos, ori = cam.get_position_orientation()
-
-            print(f'[{ori[0]}, {ori[1]}, {ori[2]}, {ori[3]}]')
-            
-            env.step(action = np.array([0,0]))
         
-        elif str(keyboard_input) == 'KeyboardInput.M':
-            cam.set_position_orientation(
-                position=c_abs_pose,   # 
-                orientation=c_abs_ori, # XYZW
-            )
 
+        action = action_generator.get_teleop_action()
 
-        count += 1
+        _, _, _, _ = env.step(action=action)
+
+        keyboard_input = action_generator.current_keypress
+
+        pos,ori = cam.get_position_orientation()
+        pos[2] = 0.9
+        
+        cam.set_position_orientation(
+            position = pos,
+            orientation = ori
+        )
+
+        print(pos, ori)
+        # if str(keyboard_input) == 'KeyboardInput.B':
+        #     count = len(os.listdir(os.path.join(save_root_path, 'debugging', 'original_image')))
+        #     print('save : ', count)
+        #     pos = cam.get_position()
+        #     ori = cam.get_orientation()
+        #     save_info_cam(count, cam, pos, ori)            
+
 
 
 

@@ -135,4 +135,36 @@ def environment_initialize(env_name, env_full):
 
     return env, action_generator
 
+def environment_initialize_empty(env_name, env_full):
+    scene_cfg = dict()
+        
+    scene_cfg = {"type":"InteractiveTraversableScene","scene_model":f'{env_name}',"load_object_categories":["floors", "walls", "ceilings"]}
+        
+    robot0_cfg = dict()
+    robot0_cfg["type"] = 'Turtlebot' #Locobot
+    robot0_cfg["obs_modalities"] = ["rgb", "depth_linear", "seg_instance"]
+    robot0_cfg["action_type"] = "continuous"
+    robot0_cfg["action_normalize"] = True
+
+    cfg = dict(scene=scene_cfg,robots=[robot0_cfg])
+    env = og.Environment(configs=cfg, action_timestep=1/45., physics_timestep=1/45.)
+
+    robot = env.robots[0]
+    controller_choices = {'base': 'DifferentialDriveController'}
+
+    controller_config = {component: {"name": name} for component, name in controller_choices.items()}
+    robot.reload_controllers(controller_config=controller_config)
+
+    env.reset()
+
+    sensor_image_width = 512   
+    sensor_image_height = 512
+    env.robots[0].sensors['robot0:eyes_Camera_sensor'].image_width = sensor_image_width 
+    env.robots[0].sensors['robot0:eyes_Camera_sensor'].image_height = sensor_image_height
+
+    action_generator = KeyboardRobotController(robot=robot)
+    action_generator.print_keyboard_teleop_info()
+
+    return env, action_generator
+
 
