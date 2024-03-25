@@ -13,6 +13,7 @@ env_number = 4
 date = '24_3_8'
 #{datetime.today().month}_{datetime.today().day}
 sim_ver = f'{env_name}_{env_number}_{date}'
+sim_ver = 'test_rs_int_cam_only2'
 
 save_root_path = f"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/saved_frames/{sim_ver}/extra_info"
 
@@ -32,17 +33,18 @@ def main():
     
     _, K_inv = omnigibson_turtlebot_intrinsic_matrix(HEIGHT, WIDTH)
 
-    gt_map = np.zeros([1024, 1024, 3], dtype=np.uint8)
-    gt_map = GT_map(OBJECT_LABEL_GROUNDTRUTH, EXCEPTION, gt_map)
+    gt_map = cv2.imread('/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/gt_map_all_env/rsint.png')
+    gt_map = cv2.flip(gt_map, 1)
+    gt_map = cv2.rotate(gt_map, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
     object_map = np.zeros([824, 824, 3], dtype=np.uint8)
 
     # last_frame = np.load(f'/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/saved_frames/{sim_ver}/debugging/frame_count.npy')[0]
-    last_frame = 985
+    last_frame = 186
     #985
     object_data = {}
 
-    for frame_num in range(0, last_frame, 5):
+    for frame_num in range(last_frame):
         print(f'load frame : {frame_num} / {last_frame}')
         formatted_count = "{:08}".format(frame_num)
 
@@ -68,11 +70,11 @@ def main():
             else:
                 label = object_info[f'{object_key}']['label']
                 id = object_info[f'{object_key}']['id']
-                subtask = object_info[f'{object_key}']['Subtask']
+                # subtask = object_info[f'{object_key}']['Subtask']
 
-                cali_coor = matrix_calibration(pose, bbox_coor, depth_npy, seg_npy, id, K_inv, RT_inv)
-                if not cali_coor.shape[0] == 0:
-                    object_data = object_data_dictionary(object_data, label, OBJECT_LABEL_GROUNDTRUTH, cali_coor, id, subtask)
+                add_true, cali_coor = matrix_calibration(pose, bbox_coor, depth_npy, seg_npy, id, K_inv, RT_inv, 2000)
+                if add_true:
+                    object_data = object_data_dictionary(object_data, label, OBJECT_LABEL_GROUNDTRUTH, cali_coor, id, task=False)
 
     # object_map = np.copy(gt_map)
     object_map = object_data_plot(object_map, object_data, task=True)

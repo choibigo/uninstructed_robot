@@ -7,14 +7,18 @@ import paramiko
 from sim_scripts.mapping_utils import *
 from datetime import datetime
 
-env_name = 'Rs_int'
-env_number = 4
-#24_{datetime.today().month}_{datetime.today().day}
-sim_ver = f'{env_name}_{env_number}_24_{datetime.today().month}_{datetime.today().day}_v3'
+env_name = 'Rs_int_custom'
+env_version = None
 
-with open(f'uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_name}_{env_number}.json', 'r') as json_file:
+env_full = (env_name+'_'+env_version) if env_version != None else env_name
+
+#24_{datetime.today().month}_{datetime.today().day}
+sim_ver = f'{env_full}_24_{datetime.today().month}_{datetime.today().day}'
+sim_ver = '45deg_test2'
+
+with open(f'uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_full}.json', 'r') as json_file:
     OBJECT_LABEL_GROUNDTRUTH = json.load(json_file)
-with open(f'uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_name}_{env_number}_exception.json', 'r') as json_file:
+with open(f'uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_full}_exception.json', 'r') as json_file:
     EXCEPTION = json.load(json_file)
 
 OBJECT_DATA = {}
@@ -47,7 +51,7 @@ def intrinsic_matrix_temp(height, width):
     return K, K_inv
 
 save_root_path = f"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/saved_frames/{sim_ver}"
-server_data_path = f'/home/cbigo/workspace/data/{env_name}_{env_number}/{sim_ver}'
+server_data_path = f'/home/cbigo/workspace/data/{env_full}/{sim_ver}'
 
 total_frame_count = len(os.listdir(f'{save_root_path}/extra_info'))
 
@@ -210,8 +214,8 @@ def main():
             json.dump(objects_in_frame, f, indent='\t', ensure_ascii=False)
         sftp.put(f'{extra_info_path}/object_info.json', f'{server_data_path}/extra_info/{formatted_count}/object_info.json')
 
-    last_frame = np.array([total_frame_count])
-    np.save(f'{save_root_path}/debugging/frame_count', last_frame)    
+    # last_frame = np.array([total_frame_count])
+    # np.save(f'{save_root_path}/debugging/frame_count', last_frame)    
 
 if __name__ == "__main__":
     main()

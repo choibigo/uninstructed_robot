@@ -84,15 +84,15 @@ def world_to_map(list_of_coor):
     map_pixel_coor_y = int(x_coor * 100 + (MAP_HEIGHT/2))
     return np.array([map_pixel_coor_x, map_pixel_coor_y])
 
-# def world_to_map_3d(list_of_coor):
-#     x_coor = list_of_coor[0]
-#     y_coor = list_of_coor[1]
-#     z_coor = list_of_coor[2]
-#     map_pixel_coor_x = (((y_coor / 5) * 512 ) + 511) // 1
-#     map_pixel_coor_y = (((x_coor / 5) * 512 ) + 511) // 1
-#     map_pixel_coor_z = (((z_coor / 5) * 512 ) + 511) // 1
+def world_to_map_3d(list_of_coor, map_size):
+    x_coor = list_of_coor[0]
+    y_coor = list_of_coor[1]
+    z_coor = list_of_coor[2]
+    map_pixel_coor_x = (((y_coor / 5) * map_size ) + (map_size/2) - 1) // 1
+    map_pixel_coor_y = (((x_coor / 5) * map_size ) + (map_size/2) - 1) // 1
+    map_pixel_coor_z = ((z_coor) * 100 ) // 1
     
-#     return int(map_pixel_coor_x), int(map_pixel_coor_y), int(map_pixel_coor_z)
+    return int(map_pixel_coor_x), int(map_pixel_coor_y), int(map_pixel_coor_z)
 
 #return distance between two coordinates
 def two_point_distance(coor1, coor2):
@@ -273,8 +273,8 @@ def matrix_calibration(c_abs_pose, bbox_coor, depth_map, seg_map, id, K_inv, RT_
     """
     bbox_coor = [segment['L_coor'], segment['R_coor'], segment['T_coor'], segment['B_coor']]
     """
-    # bbox_coor = np.array(bbox_coor)*512
-    # bbox_coor = np.array(bbox_coor, dtype=int)
+    bbox_coor = np.array(bbox_coor)*512
+    bbox_coor = np.array(bbox_coor, dtype=int)
     depth_limit = scan_radius / 100
 
     pose4 = np.append(c_abs_pose, np.array([0]))
