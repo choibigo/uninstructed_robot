@@ -104,7 +104,7 @@ def matrix_calibration(c_abs_pose, depth_map, seg_map, K_inv, RT_inv):
 result = np.empty((0, 3), dtype=int)
 rgb_result = np.empty((0, 3), dtype=np.uint8)
 
-data_root_path = r"D:\workspace\difficult\dataset\behavior_scene_image\rn_int_glove_leaf"
+data_root_path = r"D:\workspace\difficult\dataset\behavior_scene_image\test_rs_int_cam_only"
 data_extra_info_path = os.path.join(data_root_path, 'extra_info')
 
 focal_length = 24.0
