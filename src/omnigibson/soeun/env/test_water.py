@@ -1,14 +1,15 @@
 import sys
+import os
 # sys.path.append(r'/home/bluepot/dw_workspace/git/OmniGibson')
 sys.path.append(r'/home/starry/workspaces/dw_workspace/git/OmniGibson')
-import os
+
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 
 import json
-
 import numpy as np
 
 import omnigibson as og
+from omnigibson.systems import *
 from omnigibson.utils.constants import PrimType
 from omnigibson.object_states import Folded, Unfolded, Filled
 
@@ -18,9 +19,9 @@ from omnigibson.utils.ui_utils import KeyboardRobotController
 from omnigibson.utils.constants import ParticleModifyCondition
 
 
-# gm.USE_GPU_DYNAMICS = True
+gm.USE_GPU_DYNAMICS = True
 gm.ENABLE_HQ_RENDERING = True
-gm.ENABLE_FLATCACHE = True
+# gm.ENABLE_FLATCACHE = True
 gm.ENABLE_OBJECT_STATES = True
 gm.FORCE_LIGHT_INTENSITY = 1000000
 scene_name = 'office_vendor_machine'
@@ -36,6 +37,23 @@ def normalize_orientation(temp_orientation):
     return normalized_orientation
 
 if __name__ == "__main__":
+    
+    cfg = {
+        "scene": {
+            "type": "Scene",
+        },
+        "objects": [
+            {
+                "type": "DatasetObject",
+                "name": "dishtowel",
+                "category": "dishtowel",
+                "model": "dtfspn",
+                "bounding_box": [0.852, 1.1165, 0.174],
+                "abilities": {"fillable": {}, "heatable": {}},
+                "position": [1, 1, 0.5],
+            },
+        ],
+    }
     # object config
     object_load_folder = os.path.join(os.path.split(__file__)[0], f'{scene_name}_{scene_number}')
     object_list = []
@@ -71,10 +89,14 @@ if __name__ == "__main__":
 
     # env = og.Environment(configs=cfg, action_timestep=1/60., physics_timestep=1/60.)
     print(config)
-    env = og.Environment(configs=config)
+    env = og.Environment(configs=cfg)
 
-    plate = env.scene.object_registry("name", "plate_0")
-    filled = plate.states[Filled].get_value(system)
+    plate = env.scene.object_registry("name", "dishtowel")
+    print('----------------------hi',plate)
+    # system = plate.states[Filled].get_value()
+    # print(plate, filled)
+    
+    filled = plate.states[Filled].set_value(FluidSystem, True)
     print(plate, filled)
     
     
