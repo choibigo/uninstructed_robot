@@ -134,19 +134,35 @@ def bbox_points(points):
     
     return point_list, lines
 
+# def task_palette(task):
+#     if task == 0:
+#         return 'None', np.array([255,0,0])
+#     elif task == 1:
+#         return 'Preserve', np.array([102,255,255])
+#     elif task == 2:
+#         return 'Move', np.array([102,102,255])
+#     elif task == 3:
+#         return 'Brush', np.array([102,255,102])
+#     elif task == 4:
+#         return 'Put', np.array([255,102,102])
+#     elif task == 5:
+#         return 'None', np.array([255,178,102])
+#     else:
+#         return 'None', np.array([0,0,0])
 def task_palette(task):
     if task == 0:
-        return 'None', np.array([255,0,0])
+        return 'None', np.array([0,0,255])
     elif task == 1:
-        return 'Preserve', np.array([102,255,255])
+        # return 'Preserve', np.array([63,54,49])
+        return 'Preserve', np.array([85,244,255])
     elif task == 2:
-        return 'Move', np.array([102,102,255])
+        return 'Move', np.array([118,118,211])
     elif task == 3:
-        return 'Brush', np.array([102,255,102])
+        return 'Brush', np.array([219,133,95])
     elif task == 4:
-        return 'Put', np.array([255,102,102])
+        return 'Put', np.array([153,239,241])
     elif task == 5:
-        return 'None', np.array([255,178,102])
+        return 'None', np.array([0,0,255])
     else:
         return 'None', np.array([0,0,0])
     

@@ -240,6 +240,7 @@ def object_data_dictionary(object_data, label, result, task):
     return object_data
 
 def object_data_plot(map, object_data, task=False):
+    boundary_color = (136,201,3)
     for key in object_data:
         for instance in object_data[f'{key}']['instance']: 
             if task:
@@ -247,43 +248,44 @@ def object_data_plot(map, object_data, task=False):
                 cv2.rectangle(map, 
                             world_to_map((instance['3d_bbox'][0], instance['3d_bbox'][2])),
                             world_to_map((instance['3d_bbox'][1], instance['3d_bbox'][3])),
-                            task_color,
+                            task_color.tolist(),
                             -1)
             cv2.circle(map, 
                        world_to_map(instance['mid_point']), 
                        3, 
-                       object_data[f'{key}']['color'],
+                       boundary_color,
                        1)
             cv2.putText(map, 
                         key, 
                         world_to_map(instance['mid_point']), 
                         cv2.FONT_HERSHEY_SIMPLEX, 
                         0.5,
-                        object_data[f'{key}']['color'],
+                        boundary_color,
                         1,
                         cv2.LINE_AA)
+            #object_data[f'{key}']['color']
             cv2.rectangle(map, 
                             world_to_map((instance['3d_bbox'][0], instance['3d_bbox'][2])),
                             world_to_map((instance['3d_bbox'][1], instance['3d_bbox'][3])),
-                            object_data[f'{key}']['color'],
-                            2)
+                            boundary_color,
+                            1)
     return map
 
 def task_palette(task):
     if task == 0:
-        return 'None', (255,0,0)
+        return 'None', np.array([0,0,255])
     elif task == 1:
-        return 'Preserve', (102,255,255)
+        return 'Preserve', np.array([63,54,49])
     elif task == 2:
-        return 'Move', (102,102,255)
+        return 'Move', np.array([118,118,211])
     elif task == 3:
-        return 'Brush', (102,255,102)
+        return 'Brush', np.array([219,133,95])
     elif task == 4:
-        return 'Put', (255,102,102)
+        return 'Put', np.array([92,123,162])
     elif task == 5:
-        return 'None', (255,178,102)
+        return 'None', np.array([0,0,255])
     else:
-        return 'None', (0,0,0)
+        return 'None', np.array([0,0,0])
     
 def main():
     _, K_inv = intrinsic_matrix(focal_length, horiz_aperture, SENSOR_HEIGHT, SENSOR_WIDTH)
@@ -338,9 +340,10 @@ def main():
     color_palette = np.full((150,500,3), (0,0,0),dtype=np.uint8)
     for i in range(5):
         task_name, task_color = task_palette(i)
-        cv2.circle(color_palette,((100*i + 50), 50), 35, task_color, -1)
+        cv2.circle(color_palette,((100*i + 50), 50), 35, task_color.tolist(), -1)
         cv2.putText(color_palette, f'{i}:{task_name}',((100*i + 10), 125),1,1.0,(255,255,255),1)
-    
+        if i == 1:
+            cv2.circle(color_palette,((100*i + 50), 50), 35, [85,244,255], 1)
     cv2.imshow('palette', color_palette)
 
     cv2.waitKey(0)
