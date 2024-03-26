@@ -17,6 +17,12 @@ from omnigibson.utils.ui_utils import KeyboardRobotController
 from omnigibson.utils.transform_utils import quat_multiply
 import omnigibson.utils.transform_utils as T
 
+import omni.replicator.core
+import omni.isaac.core
+
+from omni.syntheticdata import helpers
+import omni.syntheticdata._syntheticdata as sd
+
 from sim_scripts.mapping_utils import *
 from sim_scripts.simulation_utils import *
 from sim_scripts.visualization_functions import *
@@ -54,58 +60,6 @@ SCAN_RADIUS = 250
 node_radius = 100
 ############### ang_vel : 0.323
 
-sim_ver = f'{env_full}_24_{datetime.today().month}_{datetime.today().day}'
-save_root_path = f"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/saved_frames/{sim_ver}_robot"
-os.makedirs(save_root_path, exist_ok=True)
-save_root_path2 = f"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/saved_frames/{sim_ver}_camera"
-os.makedirs(save_root_path2, exist_ok=True)
-
-def save_info_cam(count, cam, c_abs_pose, c_abs_ori):
-    formatted_count = "{:08}".format(count)
-    cam_obs = cam.get_obs()
-
-    extra_info = os.path.join(save_root_path2, 'extra_info', formatted_count)
-    os.makedirs(extra_info, exist_ok=True)
-
-    debugging = os.path.join(save_root_path2, 'debugging', 'original_image')
-    os.makedirs(debugging, exist_ok=True)
-
-    image_path = os.path.join(extra_info, 'original_image.png')
-    debugging_image_path = os.path.join(debugging, f'{formatted_count}.png')
-
-    depth_path = os.path.join(extra_info, 'depth')
-    seg_path = os.path.join(extra_info, 'seg')
-    pose_ori_path = os.path.join(extra_info, 'pose_ori')
-
-    cv2.imwrite(image_path, cv2.cvtColor(cam_obs["rgb"], cv2.COLOR_BGR2RGB))
-    cv2.imwrite(debugging_image_path, cv2.cvtColor(cam_obs["rgb"], cv2.COLOR_BGR2RGB))
-    np.save(depth_path, cam_obs["depth_linear"])
-    np.save(seg_path, np.array(cam_obs["seg_instance"], dtype=np.uint8))
-    np.save(pose_ori_path, np.array([c_abs_pose, c_abs_ori], dtype=object))
-
-def save_info_robot(count, robot_obs, c_abs_pose, c_abs_ori):
-    formatted_count = "{:08}".format(count)
-
-    extra_info = os.path.join(save_root_path, 'extra_info', formatted_count)
-    os.makedirs(extra_info, exist_ok=True)
-
-    debugging = os.path.join(save_root_path, 'debugging', 'original_image')
-    os.makedirs(debugging, exist_ok=True)
-
-    image_path = os.path.join(extra_info, 'original_image.png')
-    debugging_image_path = os.path.join(debugging, f'{formatted_count}.png')
-
-    depth_path = os.path.join(extra_info, 'depth')
-    seg_path = os.path.join(extra_info, 'seg')
-    pose_ori_path = os.path.join(extra_info, 'pose_ori')
-
-    cv2.imwrite(image_path, cv2.cvtColor(robot_obs['robot0:eyes_Camera_sensor_rgb'], cv2.COLOR_BGR2RGB))
-    cv2.imwrite(debugging_image_path, cv2.cvtColor(robot_obs['robot0:eyes_Camera_sensor_rgb'], cv2.COLOR_BGR2RGB))
-    np.save(depth_path, robot_obs['robot0:eyes_Camera_sensor_depth_linear'])
-    np.save(seg_path, np.array(robot_obs['robot0:eyes_Camera_sensor_seg_instance'], dtype=np.uint8))
-    np.save(pose_ori_path, np.array([c_abs_pose, c_abs_ori], dtype=object))
-
-
 def main():
     map_node = {}
 
@@ -138,6 +92,10 @@ def main():
     count = 0
     rotate_count = 0
     rotate = False
+
+    mappings = helpers.get_instance_mappings()
+    print(mappings)
+    
     while True:
 
         action = action_generator.get_teleop_action()

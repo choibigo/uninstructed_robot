@@ -6,6 +6,22 @@ import json
 import cv2
 import numpy as np
 
+
+
+###############
+
+from omni.isaac.kit import SimulationApp 
+simulation_app = SimulationApp({"headless": False})
+
+import omni.replicator.core
+import omni.isaac.core
+
+from omni.syntheticdata import helpers
+import omni.syntheticdata._syntheticdata as sd
+
+###############
+
+
 from sim_scripts.mapping_utils import *
 from datetime import datetime
 

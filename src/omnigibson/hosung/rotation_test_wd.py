@@ -11,11 +11,19 @@ import omnigibson as og
 from datetime import datetime
 import time
 import random
+import pickle 
 
 from omnigibson.macros import gm
 from omnigibson.utils.ui_utils import KeyboardRobotController
 from omnigibson.utils.transform_utils import quat_multiply
 import omnigibson.utils.transform_utils as T
+
+import omni.replicator.core
+import omni.isaac.core
+
+from omni.syntheticdata import helpers
+import omni.syntheticdata._syntheticdata as sd
+from omni.syntheticdata import visualize
 
 from sim_scripts.mapping_utils import *
 from sim_scripts.simulation_utils import *
@@ -54,11 +62,10 @@ SCAN_RADIUS = 250
 node_radius = 100
 ############### ang_vel : 0.323
 
-sim_ver = '45deg_test2'
+sim_ver = '45deg_test3_ceiling_off'
 save_root_path = f"/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/saved_frames/{sim_ver}"
 os.makedirs(save_root_path, exist_ok=True)
-
-
+    
 def environment_initialize(env_name, env_full):
     scene_cfg = dict()
 
@@ -158,19 +165,6 @@ def main():
     
     print("init")
     
-    #90 deg
-    # orientation_list = [
-    # [0.7071067811865475, 0.0, 0.0, 0.7071067811865476], 
-    # [0.6532814824381883, 0.27059805007309845, 0.2705980500730986, 0.6532814824381882],
-    # [0.5, 0.49999999999999994, 0.49999999999999994, 0.5000000000000001],
-    # [0.27059805007309856, 0.6532814824381883, 0.6532814824381883, 0.27059805007309845],
-    # [7.519030587878884e-17, 0.7071067811865474, 0.7071067811865478, 6.123233995736767e-17],
-    # [-0.27059805007309834, 0.6532814824381882, 0.6532814824381885, -0.2705980500730983],
-    # [-0.4999999999999999, 0.4999999999999999, 0.5000000000000001, -0.5000000000000002],
-    # [0.6532814824381883, -0.2705980500730986, -0.2705980500730988, 0.6532814824381883],
-    # [0.7071067811865477, -8.414233615685591e-17, -1.3566099495741733e-16, 0.7071067811865474]
-    # ]
-    
     #75deg
     orientation_list = [
         [0.6087614290087207, 0.0, 0.0, 0.7933533402912352],
@@ -186,7 +180,14 @@ def main():
     count = 0
     initiate = True
     rotate = False
+    set_position = False
     save_count = 0
+    
+    mappings = helpers.get_instance_mappings()
+
+    with open(f'/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_full}.pickle', mode = 'wb') as f:
+        pickle.dump(mappings, f)
+
     while True:
         keyboard_input = action_generator.current_keypress
 
@@ -200,7 +201,6 @@ def main():
             initiate = False
 
         if rotate:
-            print(count)
             pos, _ = cam.get_position_orientation()
             pos[2] = 0.9
 
@@ -217,17 +217,23 @@ def main():
             if count == 8:
                 count = 0
                 rotate = False
+        elif set_position:
+            cam.set_position(pos)
+            
         else:
             pos, ori = cam.get_position_orientation()
             pos[2] = 0.9
 
             cam.set_position_orientation(pos, ori)
+
         if str(keyboard_input) == 'KeyboardInput.B':
+            print(pos)
             rotate = True
         
         if str(keyboard_input) == 'KeyboardInput.N':
-            save_count = 0
-
+            set_position = True
+            input_coor = input('>>> ')
+            pos = np.array(input_coor.split(), dtype=float)
 
 
 

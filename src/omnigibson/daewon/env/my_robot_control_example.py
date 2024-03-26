@@ -3,8 +3,10 @@ Example script demo'ing robot control.
 
 Options for random actions, as well as selection of robot action space
 """
+import os
 import sys
-sys.path.append(r'D:\workspace\Difficult\git\OmniGibson')
+sys.path.append(r'/home/bluepot/dw_workspace/git/OmniGibson')
+
 
 import numpy as np
 
@@ -17,6 +19,20 @@ from omnigibson.utils.asset_utils import (
     get_og_avg_category_specs,
     get_all_object_category_models,
 )
+
+###############
+
+# from omni.isaac.kit import SimulationApp 
+# simulation_app = SimulationApp({"headless": False})
+
+import omni.replicator.core
+import omni.isaac.core
+
+from omni.syntheticdata import helpers
+import omni.syntheticdata._syntheticdata as sd
+
+###############
+
 
 CONTROL_MODES = dict(
     random="Use autonomous random actions (default)",
@@ -166,7 +182,13 @@ def main(random_selection=False, headless=False, short_exec=False):
     # Loop control until user quits
     max_steps = -1 if not short_exec else 100
     step = 0
+
+    mappings = helpers.get_instance_mappings()
+
     while step != max_steps:
+        
+        
+
         action = action_generator.get_random_action() if control_mode == "random" else action_generator.get_teleop_action()
         robot.get_obs()['robot0:eyes_Camera_sensor_rgb']
         

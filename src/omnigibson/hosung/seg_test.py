@@ -3,7 +3,6 @@ import numpy as np
 import json
 import cv2
 import paramiko
-import pickle
 
 from sim_scripts.mapping_utils import *
 from datetime import datetime
@@ -13,31 +12,27 @@ env_version = None
 
 env_full = (env_name+'_'+env_version) if env_version != None else env_name
 
-#24_{datetime.today().month}_{datetime.today().day}
 sim_ver = f'{env_full}_24_{datetime.today().month}_{datetime.today().day}'
-sim_ver = '45deg_test3_ceiling_on'
+sim_ver = '45deg_test2'
 
-with open(f'/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_full}.pickle', mode = 'rb') as f:
-    OBJECT_LABEL_GROUNDTRUTH = pickle.load(f)
-
-EXCEPTION = []
-for i in range(len(OBJECT_LABEL_GROUNDTRUTH)):
-    if OBJECT_LABEL_GROUNDTRUTH[i][3] in ['ceilings', 'walls', 'floors']:
-        EXCEPTION.append(OBJECT_LABEL_GROUNDTRUTH[i][0])
+with open(f'uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_full}.json', 'r') as json_file:
+    OBJECT_LABEL_GROUNDTRUTH = json.load(json_file)
+with open(f'uninstructed_robot/src/omnigibson/hosung/GT_dict/{env_full}_exception.json', 'r') as json_file:
+    EXCEPTION = json.load(json_file)
 
 OBJECT_DATA = {}
 
 PIXEL_REF_X = np.load('uninstructed_robot/src/omnigibson/hosung/load_data/pixel_ref_x.npy')
 PIXEL_REF_Y = np.load('uninstructed_robot/src/omnigibson/hosung/load_data/pixel_ref_y.npy')
 
-sensor_height = 1024
-sensor_width = 1024
+sensor_height = 512
+sensor_width = 512
 pixel_stride = 4
-depth_limit = 3.5
+depth_limit = 2.5
 
 def intrinsic_matrix_temp(height, width):
 
-    focal_length = 17.0
+    focal_length = 24.0
     horiz_aperture = 20.954999923706055
     vert_aperture = height/width * horiz_aperture
 
@@ -177,12 +172,14 @@ def main():
                 seg_bbox = seg_npy[segment['L_coor']:segment['R_coor'], segment['T_coor']:segment['B_coor']]
                 seg_bbox_sum = np.sum((seg_bbox == segment_id_list[idx])*1)
                 depth_bbox = depth_bbox*((seg_bbox == segment_id_list[idx])*1)
-
+                # print(np.mean(de))
+                # print(np.sum(depth_bbox))
+                # print(seg_bbox_sum)
                 if str(np.mean(depth_bbox)) == 'nan' or (np.sum(depth_bbox)/seg_bbox_sum) > depth_limit :
                     continue
                 else:
                     cv2.rectangle(rgb_image, (segment['T_coor'],segment['L_coor']), (segment['B_coor'],segment['R_coor']), (255,255,255), 1)
-                    label = OBJECT_LABEL_GROUNDTRUTH[segment_id_list[idx]-1][3]
+                    label = OBJECT_LABEL_GROUNDTRUTH[f'{segment_id_list[idx]}']['label']
                     cv2.putText(rgb_image, f'{label} : {np.sum(depth_bbox)/seg_bbox_sum}', 
                                 (segment['T_coor'],segment['L_coor']), 
                                 cv2.FONT_HERSHEY_SIMPLEX, 

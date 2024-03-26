@@ -12,9 +12,9 @@ MAP_WIDTH = 824
 def test():
     print(1)
 
-def omnigibson_turtlebot_intrinsic_matrix(height, width):
+def viewport_intrinsic_matrix(height, width):
 
-    focal_length = 24.0
+    focal_length = 17.0
     horiz_aperture = 20.954999923706055
     vert_aperture = height/width * horiz_aperture
 
@@ -286,6 +286,7 @@ def matrix_calibration(c_abs_pose, bbox_coor, depth_map, seg_map, id, K_inv, RT_
     seg_bbox = seg_map[bbox_coor[0]:bbox_coor[1],bbox_coor[2]:bbox_coor[3]]
     seg_bbox = (seg_bbox==id)*1
     bbox_sum = np.sum(seg_bbox)
+    
     pixel_bbox_x = PIXEL_REF_X[bbox_coor[0]:bbox_coor[1],bbox_coor[2]:bbox_coor[3]]
     pixel_bbox_y = PIXEL_REF_Y[bbox_coor[0]:bbox_coor[1],bbox_coor[2]:bbox_coor[3]]
     # print('seg box : ', seg_bbox.shape)

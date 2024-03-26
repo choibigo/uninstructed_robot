@@ -1,49 +1,54 @@
-import os
-import torch
-import torch.nn.functional as F
-import matplotlib.pyplot as plt
-import json
-import cv2
+import pickle
+import open3d as o3d
 import numpy as np
 
+def bbox_points(points):
+    [x_min, x_max, y_min, y_max, z_min, z_max] = points
+    point_list = [
+        [x_min, y_min, z_min],
+        [x_min, y_min, z_max],
+        [x_min, y_max, z_min],
+        [x_min, y_max, z_max],
+        [x_max, y_min, z_min],
+        [x_max, y_min, z_max],
+        [x_max, y_max, z_min],
+        [x_max, y_max, z_max]
+    ]
+    
+    lines = [[0, 1], [0, 2], [0, 4], [2, 3], [2, 6], [4, 5], [4, 6], [3, 7],
+             [5, 7], [1, 3], [1, 5], [6, 7]]
+    
+    return point_list, lines
 
-test = torch.tensor([[1.0,1.2,1.9],
-                     [-1.4,-1.5,0.6],
-                     [0.7,-0.8,1.9],
-                     [0.1,1.1,-3.2]
-                     ])
+def task_palette(task):
+    if task == 0:
+        return 'None', np.array([255,0,0])
+    elif task == 1:
+        return 'Preserve', np.array([102,255,255])
+    elif task == 2:
+        return 'Move', np.array([102,102,255])
+    elif task == 3:
+        return 'Brush', np.array([102,255,102])
+    elif task == 4:
+        return 'Put', np.array([255,102,102])
+    elif task == 5:
+        return 'None', np.array([255,178,102])
+    else:
+        return 'None', np.array([0,0,0])
+    
+with open(f'/home/bluepot/dw_workspace/git/uninstructed_robot/src/omnigibson/hosung/GT_dict/Rs_int_custom_object_data.pickle', mode = 'rb') as f:
+    object_data = pickle.load(f)
 
-test1 = test/5
-print(test1)
-test2 = test1 * 1024
-print(test2)
-test3 = test2 + 511
-print(test3)
-test4 = test3 // 1
-print(test4)
-test5 = test4.type(torch.int)
-print(test5)
+line_set_list = []
+for object_key in object_data:
+    for index in range(len(object_data[f'{object_key}']['instance'])):
+        line_set = o3d.geometry.LineSet()
+        points, lines = bbox_points(object_data[f'{object_key}']['instance'][index]['3d_bbox'])
+        line_set.points = o3d.utility.Vector3dVector(points)
+        line_set.lines = o3d.utility.Vector2iVector(lines)
+        _, color = task_palette(np.argmax(object_data[f'{object_key}']['instance'][index]['subtask']))
+        color = color / 255.0
+        line_set.colors = o3d.utility.Vector3dVector([color for i in range(len(lines))])
+        line_set_list.append(line_set)
 
-test6 = (test*(1024/5))+511
-print(test6)
-test7 = test6.type(torch.int)
-print(test7)
-print(test7[:,2])
-
-test8, indices = torch.sort(test7[:,2], dim = -1)
-print(test8)
-
-
-print(test7[:,0][indices])
-print(test7[:,1][indices])
-print(test7[:,2][indices])
-
-print('------')
-print(test7[indices])
-
-image_width = 1024
-image_height = 1024
-
-py = torch.tensor([[x for _ in range(image_width)] for x in range(image_height)])
-px = torch.tensor([[y for y in range(image_width)] for _ in range(image_height)])
-print(px)
+o3d.visualization.draw_geometries(line_set_list)

@@ -25,13 +25,12 @@ def object_data_plot(map, object_data, task=False):
                 cv2. rectangle(map, 
                             world_to_map((instance['3d_bbox'][0], instance['3d_bbox'][2])),
                             world_to_map((instance['3d_bbox'][1], instance['3d_bbox'][3])),
-                            task_palette(values[idx]),
-                            -1)
+                            task_palette(values[idx]))
             cv2.circle(map, 
                        world_to_map(instance['mid_point']), 
                        3, 
-                       object_data[f'{key}']['color'], 
-                       -1)
+                       object_data[f'{key}']['color'],
+                       1)
             #label plot
             cv2.putText(map, 
                         key, 
@@ -98,8 +97,8 @@ def object_data_dictionary(object_data, label, gt_data, final, id, task):
                             'mid_point':mid_point, 
                             '3d_bbox' : bbox_3d_coor,
                             'subtask' : [task]}],
-                'status' : gt_data[f'{id}']['status'],
-                'color' : gt_data[f'{id}']['color'],
+                'status' : None,
+                'color' : [0,255,0],
                 }
     else:
         append = True
