@@ -23,18 +23,17 @@ gm.USE_GPU_DYNAMICS = True
 gm.ENABLE_HQ_RENDERING = True
 # gm.ENABLE_FLATCACHE = True
 gm.ENABLE_OBJECT_STATES = True
-gm.FORCE_LIGHT_INTENSITY = 1000000
-scene_name = 'office_vendor_machine'
+gm.FORCE_LIGHT_INTENSITY = 500000
+scene_name = 'Wainscott_0_int'
 scene_number = 0
 
 
 def normalize_orientation(temp_orientation):
-
-    temp_orientation = np.array([0.29, -0.033, -0.1, 0.949])
     norm = np.linalg.norm(temp_orientation)
     normalized_orientation = temp_orientation / norm
     
     return normalized_orientation
+
 
 if __name__ == "__main__":
     
